@@ -1,6 +1,6 @@
 ---
 name: tanstack
-description: 提供了使用 @tanstack/cli 管理 TanStack 库、文档、项目创建和生态系统的功能。
+description: 提供了使用 @tanstack/cli 管理和排查 TanStack 生态工具（Start, Router, Query, Table 等）的能力。适用于项目初始化、官方文档检索、以及解决部署 (Deployment)、路由 (Routing) 或库相关的 404 报错与故障排查 (Troubleshooting)。Manage and troubleshoot TanStack ecosystem tools. Use for project setup, documentation search, and fixing deployment, routing, or library-related errors and 404 issues.
 ---
 
 # TanStack Skill
