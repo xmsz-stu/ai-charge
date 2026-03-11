@@ -9,10 +9,10 @@ import { notFound } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/detail/$id')({
   loader: async ({ params }) => {
-    const service = await getServiceBySlug(params.id)
+    const service = await getServiceBySlug({ data: params.id })
     if (!service) throw notFound()
 
-    const skus = await getSkusByServiceId(service.id)
+    const skus = await getSkusByServiceId({ data: service.id })
     return { service, skus }
   },
   component: DetailPage,
