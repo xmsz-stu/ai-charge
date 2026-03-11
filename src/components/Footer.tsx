@@ -2,42 +2,126 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="mt-20 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
-      <div className="page-wrap flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-        <p className="m-0 text-sm">
-          &copy; {year} Your name here. All rights reserved.
-        </p>
-        <p className="island-kicker m-0">Built with TanStack Start</p>
-      </div>
-      <div className="mt-4 flex justify-center gap-4">
-        <a
-          href="https://x.com/tan_stack"
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
-        >
-          <span className="sr-only">Follow TanStack on X</span>
-          <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
-            <path
-              fill="currentColor"
-              d="M12.6 1h2.2L10 6.48 15.64 15h-4.41L7.78 9.82 3.23 15H1l5.14-5.84L.72 1h4.52l3.12 4.73L12.6 1zm-.77 12.67h1.22L4.57 2.26H3.26l8.57 11.41z"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://github.com/TanStack"
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
-        >
-          <span className="sr-only">Go to TanStack GitHub</span>
-          <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
-            <path
-              fill="currentColor"
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-            />
-          </svg>
-        </a>
+    <footer className="bg-slate-custom-900 pb-8 pt-16 text-white transition-colors duration-300">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="grid grid-cols-1 gap-12 border-b border-slate-800 pb-16 md:grid-cols-4">
+          <div className="md:col-span-1">
+            <div className="mb-6 flex items-center gap-2">
+              <div className="bg-primary p-1.5">
+                <span className="material-symbols-outlined text-xl text-white">
+                  analytics
+                </span>
+              </div>
+              <span className="font-display text-xl font-bold tracking-tight">
+                PROXY<span className="text-primary">INDEX</span>
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-custom-500">
+              The ultimate benchmarking tool for global subscription proxies. We
+              scan 150+ providers daily to ensure you get the most accurate
+              pricing data.
+            </p>
+          </div>
+          <div>
+            <h4 className="mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+              Company
+            </h4>
+            <ul className="space-y-3 text-sm text-slate-custom-200">
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  Methodology
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  Partnerships
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  Careers
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+              Resources
+            </h4>
+            <ul className="space-y-3 text-sm text-slate-custom-200">
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  API Documentation
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  Price History Tool
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  Market Report 2024
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition-colors hover:text-primary">
+                  Community Forum
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="mb-6 text-xs font-bold uppercase tracking-widest text-primary">
+              Newsletter
+            </h4>
+            <p className="mb-4 text-xs text-slate-custom-500">
+              Get weekly alerts on major price drops.
+            </p>
+            <div className="flex border border-slate-700">
+              <input
+                className="w-full border-none bg-transparent px-3 py-2 text-sm focus:ring-0"
+                placeholder="Email address"
+                type="email"
+              />
+              <button className="bg-primary px-4 hover:bg-blue-700 transition-colors">
+                <span className="material-symbols-outlined text-sm text-white">
+                  send
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-between gap-4 pt-8 md:flex-row">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-slate-custom-500">
+            © {year} ProxyIndex Data Systems. All rights reserved.
+          </p>
+          <div className="flex gap-6">
+            <a
+              href="#"
+              className="font-mono text-[10px] uppercase tracking-widest text-slate-custom-500 no-underline transition-colors hover:text-white"
+            >
+              Privacy
+            </a>
+            <a
+              href="#"
+              className="font-mono text-[10px] uppercase tracking-widest text-slate-custom-500 no-underline transition-colors hover:text-white"
+            >
+              Terms
+            </a>
+            <a
+              href="#"
+              className="font-mono text-[10px] uppercase tracking-widest text-slate-custom-500 no-underline transition-colors hover:text-white"
+            >
+              Cookies
+            </a>
+          </div>
+        </div>
       </div>
     </footer>
   )
