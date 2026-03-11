@@ -30,7 +30,7 @@ export default function Header() {
               Price Tracker
             </Link>
             <Link
-              to="/api-docs"
+              to="/about"
               className="text-sm font-medium transition-colors hover:text-primary dark:text-slate-300"
             >
               API Docs

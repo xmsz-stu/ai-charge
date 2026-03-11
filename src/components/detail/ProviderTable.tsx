@@ -28,36 +28,18 @@ import {
   TableHeader,
   TableRow,
 } from '#/components/ui/table'
+import type { SkuWithProvider } from '#/db/queries'
 
-// --- Types & Constants ---
+// --- Icon Maps ---
 
 type ProviderIconType = 'rocket' | 'zap'
-
-interface Feature {
-  label: string
-  iconType: 'speed' | 'safety' | 'support'
-}
-
-interface Provider {
-  id: string
-  name: string
-  rating: number
-  reviews: string
-  iconType: ProviderIconType
-  features: Feature[]
-  paymentMethods: string[]
-  price: number
-  discount: string
-  isTopPick?: boolean
-  siteUrl: string
-}
 
 const PROVIDER_ICONS: Record<ProviderIconType, React.ReactNode> = {
   rocket: <Rocket className="w-6 h-6" />,
   zap: <Zap className="w-6 h-6 fill-current" />,
 }
 
-const FEATURE_ICONS: Record<Feature['iconType'], React.ReactNode> = {
+const FEATURE_ICONS: Record<string, React.ReactNode> = {
   speed: <Zap className="w-3 h-3 text-emerald-500" />,
   safety: <ShieldCheck className="w-3 h-3 text-emerald-500" />,
   support: <Zap className="w-3 h-3 text-emerald-500" />,
@@ -70,51 +52,28 @@ const PAYMENT_ICONS: Record<string, React.ReactNode> = {
   star: <Star className="w-4 h-4" />,
 }
 
-// --- Mock Data ---
-
-const data: Provider[] = [
-  {
-    id: '1',
-    name: 'FastFill Digital',
-    rating: 4.9,
-    reviews: '2.4k reviews',
-    iconType: 'rocket',
-    features: [
-      { label: 'Auto-renewal', iconType: 'safety' },
-      { label: 'Instant Delivery', iconType: 'speed' },
-    ],
-    paymentMethods: ['visa', 'crypto', 'paypal'],
-    price: 18.99,
-    discount: 'Save 12%',
-    siteUrl: '#',
-  },
-  {
-    id: '2',
-    name: 'InstantGPT',
-    rating: 5.0,
-    reviews: '450 reviews',
-    iconType: 'zap',
-    features: [
-      { label: 'Instant Delivery', iconType: 'speed' },
-      { label: '24/7 Support', iconType: 'support' },
-    ],
-    paymentMethods: ['visa', 'star'],
-    price: 18.50,
-    discount: 'Save 15%',
-    isTopPick: true,
-    siteUrl: '#',
-  },
-]
+// Helper to pick a feature icon
+function getFeatureIcon(label: string): React.ReactNode {
+  if (label.toLowerCase().includes('instant') || label.toLowerCase().includes('fast')) {
+    return FEATURE_ICONS['speed']
+  }
+  if (label.toLowerCase().includes('support') || label.toLowerCase().includes('24')) {
+    return FEATURE_ICONS['support']
+  }
+  return FEATURE_ICONS['safety']
+}
 
 // --- Column Definitions ---
 
-function getColumns(onPurchase: (provider: Provider) => void): ColumnDef<Provider>[] {
+function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWithProvider>[] {
   return [
     {
-      accessorKey: 'name',
+      accessorKey: 'provider.name',
       header: 'Provider Identity',
       cell: ({ row }) => {
-        const provider = row.original
+        const sku = row.original
+        const provider = sku.provider
+        const iconType = (provider.iconType as ProviderIconType) ?? 'rocket'
         return (
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 rounded flex items-center justify-center border transition-colors ${
@@ -122,7 +81,7 @@ function getColumns(onPurchase: (provider: Provider) => void): ColumnDef<Provide
                 ? 'bg-brand-primary/10 text-brand-primary border-brand-primary/20' 
                 : 'bg-brand-primary/5 text-brand-primary border-brand-primary/10'
             }`}>
-              {PROVIDER_ICONS[provider.iconType]}
+              {PROVIDER_ICONS[iconType]}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -135,8 +94,8 @@ function getColumns(onPurchase: (provider: Provider) => void): ColumnDef<Provide
               </div>
               <div className="flex items-center gap-1 mt-1">
                 <Star className="w-3 h-3 text-amber-400 fill-current" />
-                <span className="text-xs font-bold">{provider.rating.toFixed(1)}</span>
-                <span className="text-[10px] text-slate-400">({provider.reviews})</span>
+                <span className="text-xs font-bold">{Number(provider.rating ?? 0).toFixed(1)}</span>
+                <span className="text-[10px] text-slate-400">({provider.reviewCount?.toLocaleString()} reviews)</span>
               </div>
             </div>
           </div>
@@ -148,28 +107,29 @@ function getColumns(onPurchase: (provider: Provider) => void): ColumnDef<Provide
       header: 'Features',
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
-          {row.original.features.map((feature, i) => (
+          {(row.original.features ?? []).map((feature, i) => (
             <div 
               key={i} 
               className={`flex items-center gap-1.5 text-[11px] ${
-                row.original.isTopPick && i === 0 ? 'text-slate-500 font-bold' : 'text-slate-500'
+                row.original.provider.isTopPick && i === 0 ? 'text-slate-500 font-bold' : 'text-slate-500'
               }`}
             >
-              {FEATURE_ICONS[feature.iconType]}
-              {feature.label}
+              {getFeatureIcon(feature)}
+              {feature}
             </div>
           ))}
         </div>
       ),
     },
     {
-      accessorKey: 'paymentMethods',
+      accessorKey: 'provider.paymentMethods',
       header: () => <div className="text-center">Payment Methods</div>,
       cell: ({ row }) => {
-        const provider = row.original
+        const provider = row.original.provider
+        const methods = provider.paymentMethods ?? []
         return (
           <div className="flex justify-center gap-3">
-            {provider.paymentMethods.map((method, i) => (
+            {methods.map((method, i) => (
               <div 
                 key={i} 
                 className={`w-8 h-8 rounded border flex items-center justify-center transition-all cursor-help ${
@@ -190,22 +150,25 @@ function getColumns(onPurchase: (provider: Provider) => void): ColumnDef<Provide
       accessorKey: 'price',
       header: () => <div className="text-right">Pricing & Discount</div>,
       cell: ({ row }) => {
-        const provider = row.original
+        const sku = row.original
+        const isTopPick = sku.provider.isTopPick
         return (
           <div className="text-right">
             <p className={`text-xl font-bold leading-none ${
-              provider.isTopPick ? 'text-brand-primary' : 'text-slate-900 dark:text-white'
+              isTopPick ? 'text-brand-primary' : 'text-slate-900 dark:text-white'
             }`}>
-              ${provider.price.toFixed(2)}
+              ${Number(sku.price).toFixed(2)}
             </p>
-            <Badge 
-              variant="default" 
-              className={`mt-1 px-1.5 py-0.5 text-[9px] font-bold rounded uppercase shadow-none border-none ${
-                provider.isTopPick ? 'bg-emerald-500 text-white' : 'bg-brand-primary text-white'
-              }`}
-            >
-              {provider.discount}
-            </Badge>
+            {sku.discountLabel && (
+              <Badge 
+                variant="default" 
+                className={`mt-1 px-1.5 py-0.5 text-[9px] font-bold rounded uppercase shadow-none border-none ${
+                  isTopPick ? 'bg-emerald-500 text-white' : 'bg-brand-primary text-white'
+                }`}
+              >
+                {sku.discountLabel}
+              </Badge>
+            )}
           </div>
         )
       },
@@ -230,24 +193,37 @@ function getColumns(onPurchase: (provider: Provider) => void): ColumnDef<Provide
 
 // --- Main Component ---
 
-export function ProviderTable() {
-  const [selectedProvider, setSelectedProvider] = React.useState<Provider | null>(null)
+interface ProviderTableProps {
+  skus: SkuWithProvider[]
+}
+
+export function ProviderTable({ skus }: ProviderTableProps) {
+  const [selectedSku, setSelectedSku] = React.useState<SkuWithProvider | null>(null)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
 
-  const handlePurchase = (provider: Provider) => {
-    setSelectedProvider(provider)
+  const handlePurchase = (sku: SkuWithProvider) => {
+    setSelectedSku(sku)
     setIsModalOpen(true)
   }
 
   const columns = React.useMemo(() => getColumns(handlePurchase), [])
 
   const table = useReactTable({
-    data,
+    data: skus,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
 
-  const totalProviders = data.length
+  const totalProviders = skus.length
+
+  // Derive modal provider shape from selected SKU
+  const modalProvider = selectedSku ? {
+    id: selectedSku.provider.id,
+    name: selectedSku.provider.name,
+    rating: Number(selectedSku.provider.rating ?? 0),
+    reviews: `${selectedSku.provider.reviewCount?.toLocaleString()} reviews`,
+    price: Number(selectedSku.price),
+  } : null
 
   return (
     <section className="mb-12">
@@ -298,7 +274,7 @@ export function ProviderTable() {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className={`border-b border-slate-100 dark:border-slate-800 transition-colors ${
-                    row.original.isTopPick 
+                    row.original.provider.isTopPick 
                       ? 'bg-brand-primary/[0.03] hover:bg-brand-primary/[0.05]' 
                       : 'hover:bg-brand-primary/[0.02]'
                   }`}
@@ -307,7 +283,7 @@ export function ProviderTable() {
                     <TableCell 
                       key={cell.id} 
                       className={`px-6 py-5 relative ${
-                        row.original.isTopPick && index === 0 
+                        row.original.provider.isTopPick && index === 0 
                           ? 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-brand-primary before:z-10' 
                           : ''
                       }`}
@@ -320,7 +296,7 @@ export function ProviderTable() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  No providers available.
                 </TableCell>
               </TableRow>
             )}
@@ -337,7 +313,7 @@ export function ProviderTable() {
       <PurchaseModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        provider={selectedProvider}
+        provider={modalProvider}
       />
     </section>
   )

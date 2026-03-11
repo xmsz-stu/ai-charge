@@ -5,16 +5,22 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { useState } from 'react'
 import { EditSKUModal } from '../components/admin/EditSKUModal'
+import { getAllSkus, type AdminSku } from '../db/queries'
 
 export const Route = createFileRoute('/admin/')({
+  loader: async () => {
+    const allSkus = await getAllSkus()
+    return { allSkus }
+  },
   component: AdminDashboard,
 })
 
 function AdminDashboard() {
+  const { allSkus } = Route.useLoaderData()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingSku, setEditingSku] = useState<any>(null)
+  const [editingSku, setEditingSku] = useState<AdminSku | null>(null)
 
-  const handleEdit = (sku: any) => {
+  const handleEdit = (sku: AdminSku) => {
     setEditingSku(sku)
     setIsModalOpen(true)
   }
@@ -48,7 +54,7 @@ function AdminDashboard() {
 
         {/* Comparison Matrix Table */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
-          <SKUTable onEdit={handleEdit} />
+          <SKUTable skus={allSkus} onEdit={handleEdit} />
         </div>
 
         {/* Floating Action Button */}
