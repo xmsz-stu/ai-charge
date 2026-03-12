@@ -15,11 +15,12 @@ import {
   CreditCard, 
   ChevronRight,
   Coins,
-  Wallet 
+  Wallet
 } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
 import { PurchaseModal } from './PurchaseModal'
+import { CommunityInsights } from './CommunityInsights'
 import {
   Table,
   TableBody,
@@ -406,6 +407,8 @@ export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
         </div>
       </div>
       <ProviderTableBase table={table} totalProviders={totalProviders} columns={columns} />
+
+      <CommunityInsights />
       
       <PurchaseModal 
         isOpen={isModalOpen}
