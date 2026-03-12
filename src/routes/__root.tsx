@@ -2,7 +2,7 @@ import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-rou
 
 import appCss from '../styles.css?url'
 
-function NotFound() {
+export function NotFound() {
   return (
     <div style={{
       minHeight: '100vh',
