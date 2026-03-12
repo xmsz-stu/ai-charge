@@ -65,7 +65,7 @@ function DetailPage() {
           selectedCycle={selectedCycle} 
           onSelect={setSelectedCycle} 
         />
-        <ProviderTable skus={filteredSkus} />
+        <ProviderTable skus={filteredSkus} allSkus={skus} />
       </div>
     </MainLayout>
   )

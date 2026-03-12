@@ -30,6 +30,7 @@ import {
 } from '#/components/ui/table'
 import Price from '../ui/Price'
 import type { SkuWithProvider } from '#/db/queries'
+import { SUPPORTED_CURRENCIES } from '../../lib/currency'
 
 // --- Icon Maps ---
 
@@ -209,9 +210,11 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
 
 interface ProviderTableProps {
   skus: SkuWithProvider[]
+  allSkus: SkuWithProvider[]
 }
 
-export function ProviderTable({ skus }: ProviderTableProps) {
+export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('asc')
   const [selectedSku, setSelectedSku] = React.useState<SkuWithProvider | null>(null)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
 
@@ -222,28 +225,42 @@ export function ProviderTable({ skus }: ProviderTableProps) {
 
   const columns = React.useMemo(() => getColumns(handlePurchase), [])
 
+  // Sort SKUs based on price (converted to USD for accurate comparison)
+  const sortedSkus = React.useMemo(() => {
+    return [...skus].sort((a, b) => {
+      const rateA = SUPPORTED_CURRENCIES.find(c => c.code === (a.currency || 'USD'))?.rate || 1
+      const rateB = SUPPORTED_CURRENCIES.find(c => c.code === (b.currency || 'USD'))?.rate || 1
+      
+      const usdPriceA = Number(a.price) / rateA
+      const usdPriceB = Number(b.price) / rateB
+
+      if (sortOrder === 'asc') {
+        return usdPriceA - usdPriceB
+      } else {
+        return usdPriceB - usdPriceA
+      }
+    })
+  }, [skus, sortOrder])
+
   const table = useReactTable({
-    data: skus,
+    data: sortedSkus,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
 
   const totalProviders = skus.length
 
-  // Derive modal provider shape from selected SKU
-  const modalProvider = selectedSku ? {
-    id: selectedSku.provider.id,
-    name: selectedSku.provider.name,
-    rating: Number(selectedSku.provider.rating ?? 0),
-    reviews: `${selectedSku.provider.reviewCount?.toLocaleString()} reviews`,
-    price: Number(selectedSku.price),
-    currency: selectedSku.currency ?? 'USD',
-  } : null
+  // Get all SKUs for the selected provider from the full list (allSkus)
+  // to allow switching across cycles/versions in the modal
+  const providerSkus = React.useMemo(() => {
+    if (!selectedSku) return []
+    return allSkus.filter(s => s.providerId === selectedSku.providerId)
+  }, [allSkus, selectedSku])
 
   return (
     <section className="mb-12">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold tracking-tight">
+        <h3 className="text-xl font-bold tracking-tight text-left">
           Available Providers ({totalProviders})
         </h3>
         <div className="flex gap-4">
@@ -257,79 +274,88 @@ export function ProviderTable({ skus }: ProviderTableProps) {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-xs font-bold flex items-center gap-1 text-slate-500 hover:text-brand-primary transition-colors h-auto p-0 hover:bg-transparent"
+            className="text-xs font-bold flex items-center gap-2 text-slate-500 hover:text-brand-primary transition-colors h-auto p-0 hover:bg-transparent"
+            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
           >
-            <ArrowUpDown className="w-4 h-4" /> SORT BY PRICE
+            <ArrowUpDown className="w-4 h-4" /> 
+            SORT BY PRICE {sortOrder === 'asc' ? '(LOWEST)' : '(HIGHEST)'}
           </Button>
         </div>
       </div>
-
-      <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-background-dark">
-        <Table>
-          <TableHeader className="bg-slate-100 dark:bg-slate-800/50">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-b border-slate-200 dark:border-slate-700 hover:bg-transparent">
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-6 py-4 h-auto">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={`border-b border-slate-100 dark:border-slate-800 transition-colors ${
-                    row.original.provider.isTopPick 
-                      ? 'bg-brand-primary/[0.03] hover:bg-brand-primary/[0.05]' 
-                      : 'hover:bg-brand-primary/[0.02]'
-                  }`}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className={`px-6 py-5 relative ${
-                        row.original.provider.isTopPick && index === 0 
-                          ? 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-brand-primary before:z-10' 
-                          : ''
-                      }`}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No providers available.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        <Button 
-          variant="ghost" 
-          className="w-full py-4 text-xs font-bold text-brand-primary hover:bg-brand-primary/5 transition-all border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 rounded-none"
-        >
-          VIEW ALL {totalProviders} PROVIDERS <ChevronRight className="w-4 h-4 rotate-90" />
-        </Button>
-      </div>
-
+      <ProviderTableBase table={table} totalProviders={totalProviders} columns={columns} />
+      
       <PurchaseModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        provider={modalProvider}
+        initialSku={selectedSku}
+        allProviderSkus={providerSkus}
       />
     </section>
+  )
+}
+
+// Extract table UI to keep ProviderTable clean
+function ProviderTableBase({ table, totalProviders, columns }: { table: any, totalProviders: number, columns: any[] }) {
+  return (
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-background-dark">
+      <Table>
+        <TableHeader className="bg-slate-100 dark:bg-slate-800/50">
+          {table.getHeaderGroups().map((headerGroup: any) => (
+            <TableRow key={headerGroup.id} className="border-b border-slate-200 dark:border-slate-700 hover:bg-transparent">
+              {headerGroup.headers.map((header: any) => (
+                <TableHead key={header.id} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-6 py-4 h-auto">
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row: any) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                className={`border-b border-slate-100 dark:border-slate-800 transition-colors ${
+                  row.original.provider.isTopPick 
+                    ? 'bg-brand-primary/[0.03] hover:bg-brand-primary/[0.05]' 
+                    : 'hover:bg-brand-primary/[0.02]'
+                }`}
+              >
+                {row.getVisibleCells().map((cell: any, index: number) => (
+                  <TableCell 
+                    key={cell.id} 
+                    className={`px-6 py-5 relative ${
+                      row.original.provider.isTopPick && index === 0 
+                        ? 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-1 before:bg-brand-primary before:z-10' 
+                        : ''
+                    }`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No providers available.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <Button 
+        variant="ghost" 
+        className="w-full py-4 text-xs font-bold text-brand-primary hover:bg-brand-primary/5 transition-all border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 rounded-none"
+      >
+        VIEW ALL {totalProviders} PROVIDERS <ChevronRight className="w-4 h-4 rotate-90" />
+      </Button>
+    </div>
   )
 }

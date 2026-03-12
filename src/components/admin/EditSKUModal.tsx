@@ -17,8 +17,9 @@ import {
 import { Switch } from "../ui/switch"
 import { cn } from "../../lib/utils"
 import { useState, useEffect } from "react"
-import { getServicesForSelect, getProvidersForSelect, upsertSku } from "../../db/queries"
+import { getServicesForSelect, upsertSku } from "../../db/queries"
 import { useRouter } from "@tanstack/react-router"
+import { ProviderSelect } from "./ProviderSelect"
 
 interface EditSKUModalProps {
   isOpen: boolean
@@ -29,7 +30,6 @@ interface EditSKUModalProps {
 export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
   const router = useRouter()
   const [services, setServices] = useState<{id: string, title: string}[]>([])
-  const [providers, setProviders] = useState<{id: string, name: string}[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<any>({
     id: "",
@@ -48,12 +48,8 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
   // Load select options
   useEffect(() => {
     const loadOptions = async () => {
-      const [s, p] = await Promise.all([
-        getServicesForSelect(),
-        getProvidersForSelect()
-      ])
+      const s = await getServicesForSelect()
       setServices(s)
-      setProviders(p)
     }
     loadOptions()
   }, [])
@@ -135,19 +131,10 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5 text-left">
-                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Provider Name</Label>
-                <Select value={formData.providerId} onValueChange={(v) => setFormData({...formData, providerId: v})}>
-                  <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-none h-10 px-3 py-2 text-sm">
-                    <SelectValue placeholder="Select provider" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-none border-slate-200 dark:border-slate-800">
-                    {providers.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <ProviderSelect 
+                  value={formData.providerId} 
+                  onValueChange={(v: string) => setFormData({...formData, providerId: v})}
+                />
             </div>
           </div>
 
