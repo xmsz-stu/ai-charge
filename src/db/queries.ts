@@ -167,3 +167,51 @@ export const deleteService = createServerFn({ method: "POST" })
   .handler(async ({ data: id }: { data: string }) => {
     return db.delete(services).where(eq(services.id, id)).returning();
   });
+
+/** 获取所有供应商详细信息（用于管理后台列表） */
+export const getAllProviders = createServerFn({ method: "GET" })
+  .handler(async (): Promise<Provider[]> => {
+    return db.select().from(providers).orderBy(desc(providers.createdAt));
+  });
+
+/** 新增或更新供应商 (Provider) */
+export const upsertProvider = createServerFn({ method: "POST" })
+  .inputValidator((provider: any) => provider)
+  .handler(async ({ data }: { data: any }) => {
+    const { id, name, url, logoUrl, rating, reviewCount, isPartner, isTopPick, iconType, paymentMethods } = data;
+    
+    const providerData = {
+      name,
+      url,
+      logoUrl,
+      rating: (rating || 0).toString(),
+      reviewCount: parseInt(reviewCount) || 0,
+      isPartner: isPartner ?? false,
+      isTopPick: isTopPick ?? false,
+      iconType: iconType || "rocket",
+      paymentMethods: paymentMethods || [],
+    };
+
+    if (id) {
+      // 更新
+      return db.update(providers)
+        .set(providerData)
+        .where(eq(providers.id, id))
+        .returning();
+    } else {
+      // 新增
+      return db.insert(providers)
+        .values({
+          ...providerData,
+          id: undefined, // 让数据库生成 UUID
+        })
+        .returning();
+    }
+  });
+
+/** 删除供应商 (Provider) */
+export const deleteProvider = createServerFn({ method: "POST" })
+  .inputValidator((id: string) => id)
+  .handler(async ({ data: id }: { data: string }) => {
+    return db.delete(providers).where(eq(providers.id, id)).returning();
+  });

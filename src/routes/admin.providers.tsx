@@ -1,49 +1,84 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { AdminHeader } from '../components/admin/AdminHeader'
+import { ProviderTable } from '../components/admin/ProviderTable'
+import { EditProviderModal } from '../components/admin/EditProviderModal'
 import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { getAllProviders, deleteProvider } from '../db/queries'
+import { useRouter } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/admin/providers')({
-  component: ProvidersPage,
+  loader: async () => {
+    const providersList = await getAllProviders()
+    return { providersList }
+  },
+  component: ProviderManagementPage,
 })
 
-function ProvidersPage() {
+function ProviderManagementPage() {
+  const { providersList } = Route.useLoaderData()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedProvider, setSelectedProvider] = useState<any>(null)
+  const router = useRouter()
+
+  const handleEdit = (provider: any) => {
+    setSelectedProvider(provider)
+    setIsModalOpen(true)
+  }
+
+  const handleAdd = () => {
+    setSelectedProvider(null)
+    setIsModalOpen(true)
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProvider({ data: id })
+      await router.invalidate()
+    } catch (error) {
+      console.error('Failed to delete provider:', error)
+    }
+  }
+
   return (
     <>
-      <AdminHeader title="Provider" />
-      <div className="flex-1 p-8 overflow-auto bg-slate-50 dark:bg-slate-950">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-16 text-center shadow-sm">
-            <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="material-symbols-outlined text-4xl text-brand-primary">share_windows</span>
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 font-display">Providers Management Coming Soon</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
-              Establishing direct associations between promotional codes and distribution providers for better tracking and attribution.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Link to="/admin">
-                <Button className="bg-brand-primary hover:bg-brand-primary/90 text-white px-8 h-12 rounded-none font-bold uppercase tracking-wider transition-transform active:scale-95">
-                  BACK TO CATALOG
-                </Button>
-              </Link>
-            </div>
+      <AdminHeader title="Provider Management" />
+
+      <div className="flex-1 overflow-auto p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="relative w-96">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
+              search
+            </span>
+            <Input
+              className="pl-10 h-10 border-slate-200 dark:border-slate-800 rounded-none bg-white dark:bg-slate-900"
+              placeholder="Search providers..."
+            />
           </div>
-          
-          <div className="mt-12 grid grid-cols-3 gap-6">
-            {[
-              { title: 'Distribution Providers', desc: 'Manage your direct and indirect sales providers.', icon: 'hub' },
-              { title: 'Promo & Discounts', desc: 'Create and track provider-specific promo codes.', icon: 'sell' },
-              { title: 'Attribution Analytics', desc: 'Performance insights by distribution source.', icon: 'analytics' }
-            ].map((feature, i) => (
-              <div key={i} className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="material-symbols-outlined text-brand-primary mb-3">{feature.icon}</span>
-                <h3 className="font-bold text-slate-900 dark:text-white mb-1.5">{feature.title}</h3>
-                <p className="text-xs text-slate-500 leading-normal">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
+          <Button 
+            onClick={handleAdd}
+            className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold h-10 px-6 rounded-none flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-lg">add</span>
+            ADD PROVIDER
+          </Button>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <ProviderTable 
+            providers={providersList} 
+            onEdit={handleEdit} 
+            onDelete={handleDelete}
+          />
         </div>
       </div>
+
+      <EditProviderModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        provider={selectedProvider} 
+      />
     </>
   )
 }
