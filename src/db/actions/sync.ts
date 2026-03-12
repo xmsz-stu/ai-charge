@@ -1,5 +1,5 @@
 import { db } from '../index';
-import { providers } from '../schema';
+import { providers, skus } from '../schema';
 import { eq } from 'drizzle-orm';
 import { createServerFn } from '@tanstack/react-start';
 import { parse } from 'node-html-parser';
@@ -32,6 +32,7 @@ async function syncIpinpin(provider: any) {
             const checkoutUrl = `https://ipinpin.store/checkout/?product_id=${productId}&sku_id=${sku.sku_id}&v2=1&step=2`;
             
             results.push({
+              providerSkuId: sku.sku_id,
               externalUrl: checkoutUrl,
               name: sku.sku_recharge_item || sku.sku_type || sku.sku_name,
               price: sku.sku_price,
@@ -69,7 +70,37 @@ export const triggerProviderSync = createServerFn({ method: "POST" })
 
     // 根据提供商分发同步逻辑
     if (provider.name.includes("爱拼拼") || provider.url.includes("ipinpin.store")) {
-      return await syncIpinpin(provider);
+      const syncData = await syncIpinpin(provider);
+      
+      if (syncData.success && syncData.results) {
+        // 对照表：外部 ID -> 系统 SKU ID
+        const skuMapping: Record<string, string> = {
+          "22": "a22407a3-6224-4c12-89fa-e2b7a3efe28a",
+          "29": "92205d53-c241-4cc6-b2cc-f27bb625d1c0"
+        };
+
+        for (const item of syncData.results) {
+          const targetId = skuMapping[item.providerSkuId];
+          if (targetId) {
+            await db.update(skus)
+              .set({
+                name: item.name,
+                price: item.price,
+                originalPrice: item.originalPrice,
+                features: item.features,
+                description: item.description,
+                stock: item.stock,
+                externalUrl: item.externalUrl,
+                topUpType: item.topUpType,
+                currency: item.currency,
+                updatedAt: new Date()
+              })
+              .where(eq(skus.id, targetId));
+          }
+        }
+      }
+
+      return syncData;
     }
 
     return {
