@@ -42,7 +42,7 @@ async function syncIpinpin(provider: any) {
               stock: parseInt(sku.sku_stock) || 0,
               topUpType: sku.sku_type.includes("代充") ? "Proxy" : "Direct",
               currency: 'CNY',
-              originalPrice: sku.sku_price,
+
             });
           });
       } catch (e) {
@@ -86,7 +86,6 @@ export const triggerProviderSync = createServerFn({ method: "POST" })
               .set({
                 name: item.name,
                 price: item.price,
-                originalPrice: item.originalPrice,
                 features: item.features,
                 description: item.description,
                 stock: item.stock,

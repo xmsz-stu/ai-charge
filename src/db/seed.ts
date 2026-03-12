@@ -114,7 +114,7 @@ async function seed() {
       providerId: fastfill.id,
       name: 'ChatGPT Plus 1 Month',
       price: '18.99',
-      originalPrice: '20.00',
+
       discountLabel: 'Save 12%',
       billingCycle: 'Monthly',
       features: ['Auto-renewal', 'Instant Delivery'],
@@ -125,7 +125,7 @@ async function seed() {
       providerId: instantgpt.id,
       name: 'ChatGPT Plus 1 Month',
       price: '18.50',
-      originalPrice: '20.00',
+
       discountLabel: 'Save 15%',
       billingCycle: 'Monthly',
       features: ['Instant Delivery', '24/7 Support'],
@@ -147,7 +147,7 @@ async function seed() {
       providerId: netflixpals.id,
       name: 'Netflix Premium 1 Month',
       price: '15.50',
-      originalPrice: '22.99',
+
       discountLabel: '-32% OFF',
       billingCycle: 'Monthly',
       features: ['4K UHD', '4 Screens'],
@@ -159,7 +159,7 @@ async function seed() {
       providerId: gamsgo.id,
       name: 'YouTube Premium Family 12 Months',
       price: '17.50',
-      originalPrice: '19.99',
+
       discountLabel: '-12% OFF',
       billingCycle: 'Yearly',
       features: ['Instant Activation', 'Family Plan'],
@@ -181,7 +181,7 @@ async function seed() {
       providerId: instantgpt.id,
       name: 'Adobe Creative Cloud Annual',
       price: '35.75',
-      originalPrice: '54.99',
+
       discountLabel: '-35% OFF',
       billingCycle: 'Yearly',
       features: ['Annual Only', 'Priority Support'],

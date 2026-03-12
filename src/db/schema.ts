@@ -31,7 +31,7 @@ export const skus = pgTable("skus", {
   providerId: uuid("provider_id").references(() => providers.id, { onDelete: "cascade" }).notNull(),
   name: text("name").notNull(),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-  originalPrice: numeric("original_price", { precision: 10, scale: 2 }),
+
   discountLabel: text("discount_label"),
   billingCycle: text("billing_cycle").notNull(),
   features: text("features").array(),
