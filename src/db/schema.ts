@@ -35,6 +35,8 @@ export const skus = pgTable("skus", {
   discountLabel: text("discount_label"),
   billingCycle: text("billing_cycle").notNull(),
   features: text("features").array(),
+  description: text("description"),
+  stock: integer("stock").default(0),
   externalUrl: text("external_url"),
   
   // UI Fields
