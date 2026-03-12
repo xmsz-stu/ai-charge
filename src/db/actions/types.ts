@@ -1,4 +1,4 @@
-import { services, providers, skus } from '../schema';
+import { services, providers, skus, intels } from '../schema';
 
 export type Service = typeof services.$inferSelect & {
   startingPrice?: string | null;
@@ -6,6 +6,7 @@ export type Service = typeof services.$inferSelect & {
 };
 export type Provider = typeof providers.$inferSelect;
 export type Sku = typeof skus.$inferSelect;
+export type Intel = typeof intels.$inferSelect;
 
 export type SkuWithProvider = Sku & {
   provider: Provider;

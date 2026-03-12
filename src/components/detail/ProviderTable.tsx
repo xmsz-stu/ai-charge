@@ -30,7 +30,7 @@ import {
   TableRow,
 } from '#/components/ui/table'
 import Price from '../ui/Price'
-import type { SkuWithProvider } from '#/db/queries'
+import type { SkuWithProvider } from '#/db/actions/types'
 import { SUPPORTED_CURRENCIES, getMonthsFromCycle } from '../../lib/currency'
 
 // --- Icon Maps ---
@@ -307,9 +307,10 @@ function getColumns(
 interface ProviderTableProps {
   skus: SkuWithProvider[]
   allSkus: SkuWithProvider[]
+  serviceId: string
 }
 
-export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
+export function ProviderTable({ skus, allSkus, serviceId }: ProviderTableProps) {
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('asc')
   const [selectedSku, setSelectedSku] = React.useState<SkuWithProvider | null>(null)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
@@ -408,7 +409,7 @@ export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
       </div>
       <ProviderTableBase table={table} totalProviders={totalProviders} columns={columns} />
 
-      <CommunityInsights />
+      <CommunityInsights serviceId={serviceId} />
       
       <PurchaseModal 
         isOpen={isModalOpen}

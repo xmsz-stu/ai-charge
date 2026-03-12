@@ -52,3 +52,12 @@ export const skus = pgTable("skus", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const intels = pgTable("intels", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  serviceId: uuid("service_id").references(() => services.id, { onDelete: "cascade" }).notNull(),
+  username: text("username").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+
