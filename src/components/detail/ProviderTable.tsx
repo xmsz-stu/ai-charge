@@ -66,8 +66,16 @@ function getFeatureIcon(label: string): React.ReactNode {
 }
 
 // --- Column Definitions ---
+function getColumns(
+  onPurchase: (sku: SkuWithProvider) => void,
+  activePromoCodes: Record<string, string>,
+  togglePromoCode: (skuId: string, code: string) => void
+): ColumnDef<SkuWithProvider>[] {
+  const getDiscountPercentage = (description: string): number | null => {
+    const match = description.match(/(\d+(?:\.\d+)?)\s*%/);
+    return match ? parseFloat(match[1]) : null;
+  };
 
-function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWithProvider>[] {
   return [
     {
       accessorKey: 'provider.name',
@@ -183,14 +191,35 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
       id: 'promoCodes',
       header: 'Promotions',
       cell: ({ row }) => {
-        const promoCodes = (row.original.provider.promoCodes as any[]) || []
+        const sku = row.original
+        const promoCodes = (sku.provider.promoCodes as any[]) || []
+        const activeCode = activePromoCodes[sku.id]
+
         return (
-          <div className="flex flex-col gap-1">
-            {promoCodes.map((promo, i) => (
-              <div key={i} className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                {promo.description}
-              </div>
-            ))}
+          <div className="flex flex-col gap-1.5">
+            {promoCodes.length > 0 ? (
+              promoCodes.map((promo, i) => {
+                const isActive = activeCode === promo.code
+                return (
+                  <button
+                    key={i}
+                    onClick={() => togglePromoCode(sku.id, promo.code)}
+                    className={`text-left px-2 py-1 rounded-md text-[11px] transition-all border ${
+                      isActive
+                        ? 'bg-brand-primary/10 border-brand-primary text-brand-primary font-bold'
+                        : 'bg-emerald-50/50 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 hover:border-emerald-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-brand-primary animate-pulse' : 'bg-emerald-400 opacity-50'}`} />
+                      {promo.description}
+                    </div>
+                  </button>
+                )
+              })
+            ) : (
+              <span className="text-[10px] text-slate-400 italic">No coupons</span>
+            )}
           </div>
         )
       },
@@ -202,15 +231,39 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
         const sku = row.original
         const isTopPick = sku.provider.isTopPick
         const months = getMonthsFromCycle(sku.billingCycle)
-        const avgMonthlyPrice = months > 1 ? Number(sku.price) / months : null
+        
+        // Calculate Discounted Price
+        const activeCode = activePromoCodes[sku.id]
+        const promoCodes = (sku.provider.promoCodes as any[]) || []
+        const activePromo = promoCodes.find(p => p.code === activeCode)
+        
+        let displayPrice = Number(sku.price)
+        let hasDiscount = false
+        
+        if (activePromo) {
+          const discountPercent = getDiscountPercentage(activePromo.description)
+          if (discountPercent !== null) {
+            displayPrice = displayPrice * (1 - discountPercent / 100)
+            hasDiscount = true
+          }
+        }
+
+        const avgMonthlyPrice = months > 1 ? displayPrice / months : null
 
         return (
           <div className="text-right">
-            <p className={`text-xl font-bold leading-none ${
-              isTopPick ? 'text-brand-primary' : 'text-slate-900 dark:text-white'
-            }`}>
-              <Price amount={sku.price} fromCurrency={sku.currency ?? 'USD'} />
-            </p>
+            <div className="flex flex-col items-end">
+              {hasDiscount && (
+                <span className="text-xs text-slate-400 line-through mb-0.5">
+                  <Price amount={sku.price} fromCurrency={sku.currency ?? 'USD'} />
+                </span>
+              )}
+              <p className={`text-xl font-bold leading-none ${
+                isTopPick ? 'text-brand-primary' : 'text-slate-900 dark:text-white'
+              }`}>
+                <Price amount={displayPrice} fromCurrency={sku.currency ?? 'USD'} />
+              </p>
+            </div>
             {avgMonthlyPrice && (
               <p className="text-[10px] text-slate-500 mt-1 font-medium">
                 (avg. <Price amount={avgMonthlyPrice} fromCurrency={sku.currency ?? 'USD'} />/mo)
@@ -259,22 +312,50 @@ export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('asc')
   const [selectedSku, setSelectedSku] = React.useState<SkuWithProvider | null>(null)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
+  const [activePromoCodes, setActivePromoCodes] = React.useState<Record<string, string>>({})
 
   const handlePurchase = (sku: SkuWithProvider) => {
     setSelectedSku(sku)
     setIsModalOpen(true)
   }
 
-  const columns = React.useMemo(() => getColumns(handlePurchase), [])
+  const togglePromoCode = (skuId: string, code: string) => {
+    setActivePromoCodes(prev => {
+      const next = { ...prev }
+      if (next[skuId] === code) {
+        delete next[skuId]
+      } else {
+        next[skuId] = code
+      }
+      return next
+    })
+  }
 
-  // Sort SKUs based on price (converted to USD for accurate comparison)
+  const columns = React.useMemo(() => getColumns(handlePurchase, activePromoCodes, togglePromoCode), [activePromoCodes])
+
+  // Sort SKUs based on price (converted to USD for accurate comparison, including discounts)
   const sortedSkus = React.useMemo(() => {
+    const getDiscountPercentage = (description: string): number | null => {
+      const match = description.match(/(\d+(?:\.\d+)?)\s*%/);
+      return match ? parseFloat(match[1]) : null;
+    };
+
     return [...skus].sort((a, b) => {
-      const rateA = SUPPORTED_CURRENCIES.find(c => c.code === (a.currency || 'USD'))?.rate || 1
-      const rateB = SUPPORTED_CURRENCIES.find(c => c.code === (b.currency || 'USD'))?.rate || 1
-      
-      const usdPriceA = Number(a.price) / rateA
-      const usdPriceB = Number(b.price) / rateB
+      const calculateEffectivePrice = (sku: SkuWithProvider) => {
+        let price = Number(sku.price)
+        const activeCode = activePromoCodes[sku.id]
+        if (activeCode) {
+          const promo = (sku.provider.promoCodes as any[])?.find(p => p.code === activeCode)
+          if (promo) {
+            const pct = getDiscountPercentage(promo.description)
+            if (pct !== null) price = price * (1 - pct / 100)
+          }
+        }
+        return price / (SUPPORTED_CURRENCIES.find(c => c.code === (sku.currency || 'USD'))?.rate || 1)
+      }
+
+      const usdPriceA = calculateEffectivePrice(a)
+      const usdPriceB = calculateEffectivePrice(b)
 
       if (sortOrder === 'asc') {
         return usdPriceA - usdPriceB
@@ -282,7 +363,7 @@ export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
         return usdPriceB - usdPriceA
       }
     })
-  }, [skus, sortOrder])
+  }, [skus, sortOrder, activePromoCodes])
 
   const table = useReactTable({
     data: sortedSkus,
@@ -331,6 +412,7 @@ export function ProviderTable({ skus, allSkus }: ProviderTableProps) {
         onClose={() => setIsModalOpen(false)}
         initialSku={selectedSku}
         allProviderSkus={providerSkus}
+        appliedPromoCode={selectedSku ? activePromoCodes[selectedSku.id] : undefined}
       />
     </section>
   )

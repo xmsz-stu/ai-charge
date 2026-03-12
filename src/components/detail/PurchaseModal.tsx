@@ -19,12 +19,19 @@ interface PurchaseModalProps {
   onClose: () => void
   initialSku: SkuWithProvider | null
   allProviderSkus: SkuWithProvider[]
+  appliedPromoCode?: string
 }
 
-export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: PurchaseModalProps) {
+export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus, appliedPromoCode }: PurchaseModalProps) {
   const [selectedTopUpType, setSelectedTopUpType] = useState<string>('')
   const [selectedVersion, setSelectedVersion] = useState<string>('')
   const [selectedBillingCycle, setSelectedBillingCycle] = useState<string>('')
+  const [localPromoCode, setLocalPromoCode] = useState<string | undefined>(undefined)
+
+  const getDiscountPercentage = (description: string): number | null => {
+    const match = description.match(/(\d+(?:\.\d+)?)\s*%/);
+    return match ? parseFloat(match[1]) : null;
+  };
 
   // Initialize state when initialSku changes or modal opens
   useEffect(() => {
@@ -32,8 +39,9 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
       setSelectedTopUpType(initialSku.topUpType)
       setSelectedVersion(initialSku.version)
       setSelectedBillingCycle(initialSku.billingCycle)
+      setLocalPromoCode(appliedPromoCode)
     }
-  }, [initialSku, isOpen])
+  }, [initialSku, isOpen, appliedPromoCode])
 
   const provider = initialSku?.provider
 
@@ -153,6 +161,18 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
                     )
                     const isSelected = selectedBillingCycle === cycle
                     
+                    // Calculate Discounted Price for this cycle
+                    let cycleDisplayPrice = skuInCycle ? Number(skuInCycle.price) : 0
+                    let cycleHasDiscount = false
+                    const promo = (provider.promoCodes as any[])?.find(p => p.code === localPromoCode)
+                    if (skuInCycle && promo) {
+                      const pct = getDiscountPercentage(promo.description)
+                      if (pct !== null) {
+                        cycleDisplayPrice = cycleDisplayPrice * (1 - pct / 100)
+                        cycleHasDiscount = true
+                      }
+                    }
+
                     return (
                       <div 
                         key={cycle}
@@ -170,20 +190,29 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
                           </div>
                         )}
                         <p className="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight">{cycle}</p>
-                        <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1">
+                        <div className="mt-1">
                           {skuInCycle ? (
                             <>
-                              <Price amount={skuInCycle.price} fromCurrency={skuInCycle.currency || 'USD'} />
+                              <div className="flex flex-col">
+                                {cycleHasDiscount && (
+                                  <span className="text-[10px] text-slate-400 line-through leading-none mb-0.5">
+                                    <Price amount={skuInCycle.price} fromCurrency={skuInCycle.currency || 'USD'} />
+                                  </span>
+                                )}
+                                <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight">
+                                  <Price amount={cycleDisplayPrice} fromCurrency={skuInCycle.currency || 'USD'} />
+                                </p>
+                              </div>
                               {getMonthsFromCycle(cycle) > 1 && (
-                                <span className="text-[10px] text-slate-400 font-medium ml-1.5 align-middle">
-                                  (avg. <Price amount={Number(skuInCycle.price) / getMonthsFromCycle(cycle)} fromCurrency={skuInCycle.currency || 'USD'} />/mo)
+                                <span className="text-[10px] text-slate-400 font-medium align-middle">
+                                  (avg. <Price amount={cycleDisplayPrice / getMonthsFromCycle(cycle)} fromCurrency={skuInCycle.currency || 'USD'} />/mo)
                                 </span>
                               )}
                             </>
                           ) : (
                             <span className="text-slate-300 text-lg italic">N/A</span>
                           )}
-                        </p>
+                        </div>
                         {skuInCycle?.discountLabel && (
                           <div className={cn(
                             "mt-2 pt-2 border-t",
@@ -214,18 +243,45 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
               <Badge variant="outline" className="text-[10px] uppercase font-bold text-brand-primary border-brand-primary/20 bg-brand-primary/5 rounded-sm">
                 {activeSku?.billingCycle}
               </Badge>
+              {localPromoCode && (
+                <Badge className="bg-emerald-500 text-white text-[9px] px-1.5 rounded-sm h-4">
+                  CODE: {localPromoCode}
+                </Badge>
+              )}
             </div>
             <div className="text-right">
-              <div className="flex items-center justify-end gap-2">
-                <span className="text-lg font-bold text-slate-900 dark:text-white">
-                  <Price amount={activeSku?.price || 0} fromCurrency={activeSku?.currency || 'USD'} />
-                </span>
-              </div>
-              {activeSku && getMonthsFromCycle(activeSku.billingCycle) > 1 && (
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Average monthly: <Price amount={Number(activeSku.price) / getMonthsFromCycle(activeSku.billingCycle)} fromCurrency={activeSku.currency || 'USD'} />
-                </p>
-              )}
+              {(() => {
+                let finalPrice = Number(activeSku?.price || 0)
+                let hasFinalDiscount = false
+                const promo = (provider.promoCodes as any[])?.find(p => p.code === localPromoCode)
+                if (activeSku && promo) {
+                  const pct = getDiscountPercentage(promo.description)
+                  if (pct !== null) {
+                    finalPrice = finalPrice * (1 - pct / 100)
+                    hasFinalDiscount = true
+                  }
+                }
+
+                return (
+                  <>
+                    <div className="flex flex-col items-end">
+                      {hasFinalDiscount && (
+                        <span className="text-xs text-slate-400 line-through mb-0.5">
+                          <Price amount={activeSku?.price || 0} fromCurrency={activeSku?.currency || 'USD'} />
+                        </span>
+                      )}
+                      <span className="text-xl font-bold text-slate-900 dark:text-white leading-none">
+                        <Price amount={finalPrice} fromCurrency={activeSku?.currency || 'USD'} />
+                      </span>
+                    </div>
+                    {activeSku && getMonthsFromCycle(activeSku.billingCycle) > 1 && (
+                      <p className="text-[11px] text-slate-500 font-medium mt-1">
+                        Average monthly: <Price amount={finalPrice / getMonthsFromCycle(activeSku.billingCycle)} fromCurrency={activeSku.currency || 'USD'} />
+                      </p>
+                    )}
+                  </>
+                )
+              })()}
             </div>
           </div>
 
@@ -238,28 +294,54 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
                 <h3 className="text-slate-900 dark:text-slate-100 text-sm font-bold uppercase tracking-wider">Available Promo Codes</h3>
               </div>
               <div className="space-y-3">
-                {(provider.promoCodes as any[]).map((promo, i) => (
-                  <div key={i} className="flex items-center justify-between border border-dashed border-slate-300 dark:border-slate-600 p-3 bg-slate-50 dark:bg-slate-800/30">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-brand-primary/10 p-2 text-brand-primary">
-                        <Copy className="w-4 h-4" />
+                {(provider.promoCodes as any[]).map((promo, i) => {
+                  const isSelected = localPromoCode === promo.code
+                  return (
+                    <div 
+                      key={i} 
+                      onClick={() => setLocalPromoCode(isSelected ? undefined : promo.code)}
+                      className={cn(
+                        "flex items-center justify-between border p-3 transition-all cursor-pointer group",
+                        isSelected 
+                          ? "border-brand-primary bg-brand-primary/5 shadow-[0_0_10px_rgba(6,6,249,0.05)]" 
+                          : "border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/30 hover:border-brand-primary/50"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "p-2 transition-colors",
+                          isSelected ? "bg-brand-primary text-white" : "bg-brand-primary/10 text-brand-primary"
+                        )}>
+                          <Copy className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className={cn("font-bold text-sm", isSelected ? "text-brand-primary" : "text-slate-900 dark:text-slate-100")}>
+                            {promo.code}
+                          </p>
+                          <p className="text-slate-500 dark:text-slate-400 text-xs">{promo.description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-slate-900 dark:text-slate-100 font-bold text-sm">{promo.code}</p>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs">{promo.description}</p>
+                      <div className="flex items-center gap-2">
+                        {isSelected && (
+                          <div className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                            Applied
+                          </div>
+                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(promo.code);
+                          }}
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </Button>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => navigator.clipboard.writeText(promo.code)}
-                      className="h-8 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white transition-all uppercase text-[10px] font-bold flex items-center gap-1"
-                    >
-                      <Copy className="w-3 h-3" />
-                      Copy
-                    </Button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </section>
           )}
