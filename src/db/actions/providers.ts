@@ -20,7 +20,7 @@ export const getProvidersForSelect = createServerFn({ method: "GET" })
 export const upsertProvider = createServerFn({ method: "POST" })
   .inputValidator((provider: any) => provider)
   .handler(async ({ data }: { data: any }) => {
-    const { id, name, url, logoUrl, rating, reviewCount, isPartner, isTopPick, iconType, paymentMethods } = data;
+    const { id, name, url, logoUrl, rating, reviewCount, isPartner, isTopPick, iconType, paymentMethods, promoCodes } = data;
     
     const providerData = {
       name,
@@ -32,6 +32,7 @@ export const upsertProvider = createServerFn({ method: "POST" })
       isTopPick: isTopPick ?? false,
       iconType: iconType || "rocket",
       paymentMethods: paymentMethods || [],
+      promoCodes: promoCodes || [],
     };
 
     if (id) {

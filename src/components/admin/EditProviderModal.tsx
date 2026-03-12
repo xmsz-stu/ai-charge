@@ -11,6 +11,7 @@ import { Switch } from "../ui/switch"
 import { useState, useEffect } from "react"
 import { upsertProvider } from "../../db/queries"
 import { useRouter } from "@tanstack/react-router"
+import { Plus, Trash2 } from "lucide-react"
 
 interface EditProviderModalProps {
   isOpen: boolean
@@ -32,6 +33,7 @@ export function EditProviderModal({ isOpen, onClose, provider }: EditProviderMod
     isTopPick: false,
     iconType: "rocket",
     paymentMethods: [],
+    promoCodes: [],
   })
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export function EditProviderModal({ isOpen, onClose, provider }: EditProviderMod
         isTopPick: provider.isTopPick ?? false,
         iconType: provider.iconType || "rocket",
         paymentMethods: provider.paymentMethods || [],
+        promoCodes: provider.promoCodes || [],
       })
     } else {
       setFormData({
@@ -60,6 +63,7 @@ export function EditProviderModal({ isOpen, onClose, provider }: EditProviderMod
         isTopPick: false,
         iconType: "rocket",
         paymentMethods: [],
+        promoCodes: [],
       })
     }
   }, [provider, isOpen])
@@ -139,6 +143,69 @@ export function EditProviderModal({ isOpen, onClose, provider }: EditProviderMod
                 onChange={(e) => setFormData({...formData, reviewCount: parseInt(e.target.value) || 0})}
                 className="rounded-none bg-slate-50 dark:bg-slate-900" 
               />
+            </div>
+          </div>
+
+          {/* Promo Codes Section */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Discount Codes</Label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setFormData({...formData, promoCodes: [...(formData.promoCodes || []), { code: "", description: "" }]})}
+                className="h-7 px-2 text-[10px] rounded-none border-dashed"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Code
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              {(formData.promoCodes || []).map((item: any, index: number) => (
+                <div key={index} className="flex gap-2 items-start bg-slate-50 dark:bg-slate-900 p-2 border border-slate-100 dark:border-slate-800">
+                  <div className="flex-1 space-y-1">
+                    <Input 
+                      placeholder="Code (e.g. SAVE10)" 
+                      value={item.code}
+                      onChange={(e) => {
+                        const newCodes = [...formData.promoCodes];
+                        newCodes[index] = { ...newCodes[index], code: e.target.value };
+                        setFormData({...formData, promoCodes: newCodes});
+                      }}
+                      className="h-8 text-xs rounded-none bg-white dark:bg-slate-950"
+                    />
+                    <Input 
+                      placeholder="Description" 
+                      value={item.description}
+                      onChange={(e) => {
+                        const newCodes = [...formData.promoCodes];
+                        newCodes[index] = { ...newCodes[index], description: e.target.value };
+                        setFormData({...formData, promoCodes: newCodes});
+                      }}
+                      className="h-8 text-xs rounded-none bg-white dark:bg-slate-950"
+                    />
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => {
+                      const newCodes = [...formData.promoCodes];
+                      newCodes.splice(index, 1);
+                      setFormData({...formData, promoCodes: newCodes});
+                    }}
+                    className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50/50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              {(!formData.promoCodes || formData.promoCodes.length === 0) && (
+                <div className="text-[10px] text-slate-400 text-center py-4 border border-dashed border-slate-200 dark:border-slate-800">
+                  No discount codes added yet
+                </div>
+              )}
             </div>
           </div>
 

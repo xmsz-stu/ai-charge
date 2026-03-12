@@ -11,6 +11,7 @@ import Price from '../ui/Price'
 import { type SkuWithProvider } from '#/db/actions/types'
 import { useState, useMemo, useEffect } from 'react'
 import { cn } from '#/lib/utils'
+import { getMonthsFromCycle } from '../../lib/currency'
 
 interface PurchaseModalProps {
   isOpen: boolean
@@ -170,7 +171,14 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
                         <p className="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight">{cycle}</p>
                         <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1">
                           {skuInCycle ? (
-                            <Price amount={skuInCycle.price} fromCurrency={skuInCycle.currency || 'USD'} />
+                            <>
+                              <Price amount={skuInCycle.price} fromCurrency={skuInCycle.currency || 'USD'} />
+                              {getMonthsFromCycle(cycle) > 1 && (
+                                <span className="text-[10px] text-slate-400 font-medium ml-1.5 align-middle">
+                                  (avg. <Price amount={Number(skuInCycle.price) / getMonthsFromCycle(cycle)} fromCurrency={skuInCycle.currency || 'USD'} />/mo)
+                                </span>
+                              )}
+                            </>
                           ) : (
                             <span className="text-slate-300 text-lg italic">N/A</span>
                           )}
@@ -197,48 +205,63 @@ export function PurchaseModal({ isOpen, onClose, initialSku, allProviderSkus }: 
           </section>
 
           <hr className="mx-6 border-slate-100 dark:border-slate-800" />
+          
+          {/* Selected Plan Summary with Monthly Average */}
+          <div className="px-6 py-4 flex items-center justify-between group">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Order Summary</span>
+              <Badge variant="outline" className="text-[10px] uppercase font-bold text-brand-primary border-brand-primary/20 bg-brand-primary/5 rounded-sm">
+                {activeSku?.billingCycle}
+              </Badge>
+            </div>
+            <div className="text-right">
+              <div className="flex items-center justify-end gap-2">
+                <span className="text-lg font-bold text-slate-900 dark:text-white">
+                  <Price amount={activeSku?.price || 0} fromCurrency={activeSku?.currency || 'USD'} />
+                </span>
+              </div>
+              {activeSku && getMonthsFromCycle(activeSku.billingCycle) > 1 && (
+                <p className="text-[11px] text-slate-500 font-medium">
+                  Average monthly: <Price amount={Number(activeSku.price) / getMonthsFromCycle(activeSku.billingCycle)} fromCurrency={activeSku.currency || 'USD'} />
+                </p>
+              )}
+            </div>
+          </div>
+
+          <hr className="mx-6 border-slate-100 dark:border-slate-800" />
 
           {/* Discount Ledger Section */}
-          <section className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-900 dark:text-slate-100 text-sm font-bold uppercase tracking-wider">Available Promo Codes</h3>
-              <span className="text-brand-primary text-xs font-medium cursor-pointer hover:underline">View all</span>
-            </div>
-            <div className="space-y-3">
-              {/* Promo Code 1 */}
-              <div className="flex items-center justify-between border border-dashed border-slate-300 dark:border-slate-600 p-3 bg-slate-50 dark:bg-slate-800/30">
-                <div className="flex items-center gap-3">
-                  <div className="bg-brand-primary/10 p-2 text-brand-primary">
-                    <Copy className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-slate-900 dark:text-slate-100 font-bold text-sm">SAVE10</p>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs">10% off any monthly plan</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="h-8 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white transition-all uppercase text-[10px] font-bold flex items-center gap-1">
-                  <Copy className="w-3 h-3" />
-                  Copy
-                </Button>
+          {provider.promoCodes && (provider.promoCodes as any[]).length > 0 && (
+            <section className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-slate-900 dark:text-slate-100 text-sm font-bold uppercase tracking-wider">Available Promo Codes</h3>
               </div>
-              {/* Promo Code 2 */}
-              <div className="flex items-center justify-between border border-dashed border-slate-300 dark:border-slate-600 p-3 bg-slate-50 dark:bg-slate-800/30">
-                <div className="flex items-center gap-3">
-                  <div className="bg-brand-primary/10 p-2 text-brand-primary">
-                    <Zap className="w-4 h-4" />
+              <div className="space-y-3">
+                {(provider.promoCodes as any[]).map((promo, i) => (
+                  <div key={i} className="flex items-center justify-between border border-dashed border-slate-300 dark:border-slate-600 p-3 bg-slate-50 dark:bg-slate-800/30">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-brand-primary/10 p-2 text-brand-primary">
+                        <Copy className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-slate-900 dark:text-slate-100 font-bold text-sm">{promo.code}</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs">{promo.description}</p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigator.clipboard.writeText(promo.code)}
+                      className="h-8 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white transition-all uppercase text-[10px] font-bold flex items-center gap-1"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Copy
+                    </Button>
                   </div>
-                  <div>
-                    <p className="text-slate-900 dark:text-slate-100 font-bold text-sm">YEARLY20</p>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs">20% off annual subscriptions</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="h-8 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white transition-all uppercase text-[10px] font-bold flex items-center gap-1">
-                  <Copy className="w-3 h-3" />
-                  Copy
-                </Button>
+                ))}
               </div>
-            </div>
-          </section>
+            </section>
+          )}
         </div>
 
         {/* Action Area */}

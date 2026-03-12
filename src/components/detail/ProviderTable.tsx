@@ -30,7 +30,7 @@ import {
 } from '#/components/ui/table'
 import Price from '../ui/Price'
 import type { SkuWithProvider } from '#/db/queries'
-import { SUPPORTED_CURRENCIES } from '../../lib/currency'
+import { SUPPORTED_CURRENCIES, getMonthsFromCycle } from '../../lib/currency'
 
 // --- Icon Maps ---
 
@@ -52,24 +52,6 @@ const PAYMENT_ICONS: Record<string, React.ReactNode> = {
   crypto: <Coins className="w-4 h-4" />,
   paypal: <Wallet className="w-4 h-4" />,
   star: <Star className="w-4 h-4" />,
-}
-
-// Helper to parse billing cycle string into number of months
-function getMonthsFromCycle(cycle: string): number {
-  const c = cycle.toLowerCase()
-  if (c.includes('1 month') || c === 'monthly' || c === 'month') return 1
-  if (c.includes('3 months')) return 3
-  if (c.includes('6 months')) return 6
-  if (c.includes('1 year') || c === 'yearly' || c === 'annual') return 12
-  
-  // Regex fallbacks
-  const monthMatch = c.match(/(\d+)\s*month/)
-  if (monthMatch) return parseInt(monthMatch[1])
-  
-  const yearMatch = c.match(/(\d+)\s*year/)
-  if (yearMatch) return parseInt(yearMatch[1]) * 12
-  
-  return 1
 }
 
 // Helper to pick a feature icon
@@ -130,7 +112,7 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
                 <span className="text-xs font-bold">{Number(provider.rating ?? 0).toFixed(1)}</span>
                 <span className="text-[10px] text-slate-400">({provider.reviewCount?.toLocaleString()} reviews)</span>
               </div>
-              {provider.promoCodes && (provider.promoCodes as any[]).length > 0 && (
+              {/* {provider.promoCodes && (provider.promoCodes as any[]).length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {(provider.promoCodes as any[]).map((promo, i) => (
                     <div 
@@ -147,7 +129,7 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
                     </div>
                   ))}
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         )

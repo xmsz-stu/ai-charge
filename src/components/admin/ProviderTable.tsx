@@ -25,6 +25,7 @@ export function ProviderTable({ providers, onEdit, onDelete }: ProviderTableProp
             <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Provider Name</TableHead>
             <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">URL</TableHead>
             <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Rating</TableHead>
+            <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Promo Codes</TableHead>
             <TableHead className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -61,6 +62,17 @@ export function ProviderTable({ providers, onEdit, onDelete }: ProviderTableProp
                   <span className="material-symbols-outlined text-sm text-yellow-500 fill-yellow-500">star</span>
                   <span className="text-sm font-bold">{provider.rating}</span>
                   <span className="text-[10px] text-slate-400">({provider.reviewCount})</span>
+                </div>
+              </TableCell>
+              <TableCell className="px-6 py-4">
+                <div className="flex flex-wrap gap-1">
+                  {provider.promoCodes && (provider.promoCodes as any[]).length > 0 ? (
+                    <span className="text-xs px-2 py-0.5 bg-brand-primary/10 text-brand-primary font-bold">
+                      {(provider.promoCodes as any[]).length} Codes
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400">None</span>
+                  )}
                 </div>
               </TableCell>
               <TableCell className="px-6 py-4 text-right">

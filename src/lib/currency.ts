@@ -56,3 +56,25 @@ export function formatPrice(price: number, currency: Currency): string {
     maximumFractionDigits: 2,
   }).format(price);
 }
+
+/**
+ * Parses a billing cycle string (e.g. "Monthly", "1 Year", "3 Months") 
+ * and returns the number of months.
+ */
+export function getMonthsFromCycle(cycle: string): number {
+  if (!cycle) return 1;
+  const c = cycle.toLowerCase();
+  if (c.includes('1 month') || c === 'monthly' || c === 'month') return 1;
+  if (c.includes('3 months')) return 3;
+  if (c.includes('6 months')) return 6;
+  if (c.includes('1 year') || c === 'yearly' || c === 'annual') return 12;
+  
+  // Regex fallbacks for things like "2 Months" or "2 Years"
+  const monthMatch = c.match(/(\d+)\s*month/);
+  if (monthMatch) return parseInt(monthMatch[1]);
+  
+  const yearMatch = c.match(/(\d+)\s*year/);
+  if (yearMatch) return parseInt(yearMatch[1]) * 12;
+  
+  return 1;
+}

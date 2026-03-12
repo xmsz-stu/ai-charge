@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, numeric, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid, numeric, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 
 export const services = pgTable("services", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -22,6 +22,7 @@ export const providers = pgTable("providers", {
   isTopPick: boolean("is_top_pick").default(false),  // 推荐供应商标记
   iconType: text("icon_type").default("rocket"),      // "rocket" | "zap"
   paymentMethods: text("payment_methods").array(),    // ["visa", "crypto", "paypal"]
+  promoCodes: jsonb("promo_codes").$type<{ code: string; description: string }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
