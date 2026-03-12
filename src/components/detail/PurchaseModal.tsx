@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from '#/components/ui/dialog'
 import { Button } from '#/components/ui/button'
+import Price from '../ui/Price'
 
 interface Provider {
   id: string
@@ -100,7 +101,7 @@ export function PurchaseModal({ isOpen, onClose, provider }: PurchaseModalProps)
                       <CheckCircle2 className="w-5 h-5 text-brand-primary" />
                     </div>
                     <p className="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight">1 Month</p>
-                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1">${provider.price.toFixed(2)}</p>
+                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1"><Price usdPrice={provider.price} /></p>
                     <div className="mt-2 pt-2 border-t border-brand-primary/20">
                       <p className="text-brand-primary text-[10px] font-bold uppercase">Standard Plan</p>
                     </div>
@@ -108,7 +109,7 @@ export function PurchaseModal({ isOpen, onClose, provider }: PurchaseModalProps)
                   {/* Plan Card */}
                   <div className="border border-slate-200 dark:border-slate-700 p-4 hover:border-brand-primary/50 transition-all cursor-pointer bg-white dark:bg-slate-800/50 group">
                     <p className="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight">3 Months</p>
-                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1">${(provider.price * 2.7).toFixed(2)}</p>
+                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1"><Price usdPrice={provider.price * 2.7} /></p>
                     <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                       <p className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase">Save 10%</p>
                     </div>
@@ -116,7 +117,7 @@ export function PurchaseModal({ isOpen, onClose, provider }: PurchaseModalProps)
                   {/* Plan Card */}
                   <div className="border border-slate-200 dark:border-slate-700 p-4 hover:border-brand-primary/50 transition-all cursor-pointer bg-white dark:bg-slate-800/50 group">
                     <p className="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight">1 Year</p>
-                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1">${(provider.price * 10).toFixed(2)}</p>
+                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1"><Price usdPrice={provider.price * 10} /></p>
                     <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                       <p className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase">Save 16%</p>
                     </div>
@@ -124,7 +125,7 @@ export function PurchaseModal({ isOpen, onClose, provider }: PurchaseModalProps)
                   {/* Plan Card */}
                   <div className="border border-slate-200 dark:border-slate-700 p-4 hover:border-brand-primary/50 transition-all cursor-pointer bg-white dark:bg-slate-800/50 group">
                     <p className="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-tight">Lifetime</p>
-                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1">$599.00</p>
+                    <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold mt-1"><Price usdPrice={599} /></p>
                     <div className="mt-2">
                       <span className="inline-block bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] px-2 py-0.5 font-bold uppercase">Best Value</span>
                     </div>

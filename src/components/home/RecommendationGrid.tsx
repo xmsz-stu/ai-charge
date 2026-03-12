@@ -1,4 +1,5 @@
 import type { Service } from '../../db/queries'
+import Price from '../ui/Price'
 
 interface RecommendationGridProps {
   services: Service[]
@@ -43,7 +44,7 @@ export default function RecommendationGrid({ services }: RecommendationGridProps
                   Starting Price
                 </span>
                 <p className="font-display text-2xl font-bold transition-colors duration-300 dark:text-white">
-                  ${Number(item.startingPrice ?? 0).toFixed(2)}
+                  <Price usdPrice={item.startingPrice ?? 0} />
                   <span className="text-sm font-normal text-slate-500">
                     /mo
                   </span>

@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '#/components/ui/table'
+import Price from '../ui/Price'
 import type { SkuWithProvider } from '#/db/queries'
 
 // --- Icon Maps ---
@@ -157,7 +158,7 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
             <p className={`text-xl font-bold leading-none ${
               isTopPick ? 'text-brand-primary' : 'text-slate-900 dark:text-white'
             }`}>
-              ${Number(sku.price).toFixed(2)}
+              <Price usdPrice={sku.price} />
             </p>
             {sku.discountLabel && (
               <Badge 

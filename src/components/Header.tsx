@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import ThemeToggle from './ThemeToggle'
+import CurrencySelector from './CurrencySelector'
 
 export default function Header() {
   return (
@@ -45,10 +46,7 @@ export default function Header() {
         </div>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <button className="flex items-center gap-2 border border-slate-200 px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900">
-            <span className="material-symbols-outlined text-sm">language</span>
-            USD
-          </button>
+          <CurrencySelector />
           <button className="bg-primary px-6 py-2 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-blue-700">
             Login
           </button>

@@ -1,4 +1,5 @@
 import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-router'
+import { CurrencyProvider } from '../components/CurrencyContext'
 
 import appCss from '../styles.css?url'
 
@@ -92,7 +93,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="antialiased font-display">
-        {children}
+        <CurrencyProvider>
+          {children}
+        </CurrencyProvider>
         <Scripts />
       </body>
     </html>

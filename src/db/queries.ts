@@ -1,11 +1,13 @@
 import { db } from './index';
 import { services, providers, skus } from './schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, min } from 'drizzle-orm';
 import { createServerFn } from '@tanstack/react-start';
 
 // ——— Type Definitions —————————————————————————————————————
 
-export type Service = typeof services.$inferSelect;
+export type Service = typeof services.$inferSelect & {
+  startingPrice?: string | null;
+};
 export type Provider = typeof providers.$inferSelect;
 export type Sku = typeof skus.$inferSelect;
 
@@ -22,21 +24,63 @@ export type ServiceWithSkus = Service & {
 /** 获取所有服务（用于首页服务列表） */
 export const getServices = createServerFn({ method: "GET" })
   .handler(async (): Promise<Service[]> => {
-    return db.select().from(services).orderBy(desc(services.createdAt));
+    const results = await db
+      .select({
+        service: services,
+        minPrice: min(skus.price),
+      })
+      .from(services)
+      .leftJoin(skus, eq(services.id, skus.serviceId))
+      .groupBy(services.id)
+      .orderBy(desc(services.createdAt));
+
+    return results.map(r => ({
+      ...r.service,
+      startingPrice: r.minPrice,
+    }));
   });
 
 /** 获取推荐服务（取最近的 3 个） */
 export const getFeaturedServices = createServerFn({ method: "GET" })
   .handler(async (): Promise<Service[]> => {
-    return db.select().from(services).orderBy(desc(services.createdAt)).limit(3);
+    const results = await db
+      .select({
+        service: services,
+        minPrice: min(skus.price),
+      })
+      .from(services)
+      .leftJoin(skus, eq(services.id, skus.serviceId))
+      .groupBy(services.id)
+      .orderBy(desc(services.createdAt))
+      .limit(3);
+
+    return results.map(r => ({
+      ...r.service,
+      startingPrice: r.minPrice,
+    }));
   });
 
 /** 按 ID 获取单个服务 */
 export const getServiceById = createServerFn({ method: "GET" })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }: { data: string }): Promise<Service | null> => {
-    const result = await db.select().from(services).where(eq(services.id, id)).limit(1);
-    return result[0] ?? null;
+    const result = await db
+      .select({
+        service: services,
+        minPrice: min(skus.price),
+      })
+      .from(services)
+      .leftJoin(skus, eq(services.id, skus.serviceId))
+      .where(eq(services.id, id))
+      .groupBy(services.id)
+      .limit(1);
+
+    if (result.length === 0) return null;
+    
+    return {
+      ...result[0].service,
+      startingPrice: result[0].minPrice,
+    };
   });
 
 /** 获取某服务下的所有 SKU（含供应商信息，用于详情页供应商表格） */

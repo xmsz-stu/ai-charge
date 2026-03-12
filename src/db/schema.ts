@@ -6,7 +6,6 @@ export const services = pgTable("services", {
   description: text("description"),
   category: text("category").notNull(),
   logoUrl: text("logo_url"),
-  startingPrice: numeric("starting_price", { precision: 10, scale: 2 }), // Lowest price snapshot
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -1,6 +1,7 @@
-import { Search, ShoppingCart, User, Layers } from 'lucide-react'
+import { Search, User, Layers } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import CurrencySelector from '../CurrencySelector'
 
 export function DetailHeader() {
   return (
@@ -27,11 +28,9 @@ export function DetailHeader() {
             />
           </div>
           <Button variant="ghost" size="icon" className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
-            <ShoppingCart className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
             <User className="w-5 h-5" />
           </Button>
+          <CurrencySelector />
         </div>
       </div>
     </header>

@@ -172,7 +172,7 @@ export function EditProviderModal({ isOpen, onClose, provider }: EditProviderMod
           </Button>
           <Button 
             onClick={handleSave}
-            disabled={isLoading || !formData.name || !formData.url}
+            disabled={isLoading || !formData.name }
             className="bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-2 text-sm font-bold uppercase tracking-widest rounded-none min-w-[120px]"
           >
             {isLoading ? "Saving..." : "Save Provider"}

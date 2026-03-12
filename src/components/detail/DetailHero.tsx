@@ -1,6 +1,7 @@
 import { Verified } from 'lucide-react'
 import { Badge } from '#/components/ui/badge'
 import type { Service } from '#/db/queries'
+import Price from '../ui/Price'
 
 interface DetailHeroProps {
   service: Service
@@ -25,9 +26,6 @@ export function DetailHero({ service }: DetailHeroProps) {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-4xl font-bold tracking-tight">{service.title}</h2>
-              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded uppercase">
-                {service.region}
-              </Badge>
             </div>
             <p className="text-slate-600 dark:text-slate-400 max-w-xl text-lg leading-relaxed">
               {service.description}
@@ -39,7 +37,7 @@ export function DetailHero({ service }: DetailHeroProps) {
         <div className="text-right">
           <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Starting at</p>
           <p className="text-3xl font-bold text-brand-primary">
-            ${Number(service.startingPrice ?? 0).toFixed(2)}
+            <Price usdPrice={service.startingPrice ?? 0} />
             <span className="text-sm font-normal text-slate-400">/mo</span>
           </p>
         </div>
