@@ -32,10 +32,21 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
     version: "Plus",
     billingCycle: "1 Month",
     basePrice: 20.00,
+    currency: "USD",
     processingFee: 2.5,
     discount: 0,
     autoSync: true,
   })
+
+  const currencies = [
+    { code: 'USD', symbol: '$' },
+    { code: 'CNY', symbol: '¥' },
+    { code: 'EUR', symbol: '€' },
+    { code: 'GBP', symbol: '£' },
+    { code: 'HKD', symbol: 'HK$' },
+  ]
+
+  const currentCurrency = currencies.find(c => c.code === formData.currency) || currencies[0]
 
   useEffect(() => {
     if (sku) {
@@ -159,13 +170,25 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
             <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-brand-primary mb-4">Section 03 / Pricing & Calculation</h3>
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="space-y-1.5 text-left">
-                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Base Price ($)</Label>
-                <Input 
-                  type="number" 
-                  value={formData.basePrice} 
-                  onChange={(e) => setFormData({...formData, basePrice: parseFloat(e.target.value) || 0})}
-                  className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-none"
-                />
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Base Price</Label>
+                <div className="flex">
+                  <Select  value={formData.currency} onValueChange={(v) => setFormData({...formData, currency: v})}>
+                    <SelectTrigger  className="w-[80px] h-10! bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-800 rounded-none border-r-0  text-xs font-bold">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none border-slate-200 dark:border-slate-800">
+                      {currencies.map(c => (
+                        <SelectItem key={c.code} value={c.code} className="text-xs">{c.code} ({c.symbol})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input 
+                    type="number" 
+                    value={formData.basePrice} 
+                    onChange={(e) => setFormData({...formData, basePrice: parseFloat(e.target.value) || 0})}
+                    className="flex-1 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-none h-10"
+                  />
+                </div>
               </div>
               <div className="space-y-1.5 text-left">
                 <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Fee (%)</Label>
@@ -188,7 +211,10 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
             </div>
             <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center transition-colors">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Calculated Net Price</span>
-              <span className="text-2xl font-bold text-slate-900 dark:text-white font-display">${netPrice}</span>
+              <span className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+                <span className="text-lg mr-1 text-slate-400 font-normal">{currentCurrency.symbol}</span>
+                {netPrice}
+              </span>
             </div>
           </div>
 
