@@ -58,6 +58,44 @@ async function syncIpinpin(provider: any) {
   };
 }
 
+/**
+ * 星际放映厅 (naifeistation.com) 同步逻辑
+ */
+async function syncNaifei(provider: any) {
+  const targetUrl = "https://www.naifeistation.com/index/getGoods?id=241";
+  const response = await fetch(targetUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+  });
+  const json = await response.json();
+  const results: any[] = [];
+
+  if (json.code === 1 && json.data && json.data.specification) {
+    const goodsId = json.data.id;
+    json.data.specification.forEach((spec: any) => {
+      results.push({
+        providerSkuId: spec.time.toString(),
+        externalUrl: `https://www.naifeistation.com/index/buy?id=${goodsId}`,
+        name: spec.notify || spec.name,
+        price: spec.price,
+        billingCycle: `${spec.time} Month(s)`,
+        features: spec.remark ? [spec.remark] : [],
+        description: json.data.content,
+        stock: 999,
+        topUpType: "Proxy",
+        currency: 'CNY',
+      });
+    });
+  }
+
+  return {
+    success: true,
+    provider: provider.name,
+    results
+  };
+}
+
 /** 手动触发供应商同步 */
 export const triggerProviderSync = createServerFn({ method: "POST" })
   .inputValidator((providerId: string) => providerId)
@@ -69,36 +107,43 @@ export const triggerProviderSync = createServerFn({ method: "POST" })
     if (!provider) throw new Error("Provider not found");
 
     // 根据提供商分发同步逻辑
-    if (provider.name.includes("爱拼拼") || provider.url.includes("ipinpin.store")) {
-      const syncData = await syncIpinpin(provider);
-      
-      if (syncData.success && syncData.results) {
-        // 对照表：外部 ID -> 系统 SKU ID
-        const skuMapping: Record<string, string> = {
-          "22": "a22407a3-6224-4c12-89fa-e2b7a3efe28a",
-          "29": "92205d53-c241-4cc6-b2cc-f27bb625d1c0"
-        };
+    let syncData: any = null;
+    let skuMapping: Record<string, string> = {};
 
-        for (const item of syncData.results) {
-          const targetId = skuMapping[item.providerSkuId];
-          if (targetId) {
-            await db.update(skus)
-              .set({
-                name: item.name,
-                price: item.price,
-                features: item.features,
-                description: item.description,
-                stock: item.stock,
-                externalUrl: item.externalUrl,
-                topUpType: item.topUpType,
-                currency: item.currency,
-                updatedAt: new Date()
-              })
-              .where(eq(skus.id, targetId));
-          }
+    if (provider.name.includes("爱拼拼") || provider.url.includes("ipinpin.store")) {
+      syncData = await syncIpinpin(provider);
+      skuMapping = {
+        "22": "a22407a3-6224-4c12-89fa-e2b7a3efe28a",
+        "29": "92205d53-c241-4cc6-b2cc-f27bb625d1c0"
+      };
+    } else if (provider.name.includes("星际放映厅") || provider.url.includes("naifeistation.com")) {
+      syncData = await syncNaifei(provider);
+      skuMapping = {
+        "1": "4fc9aeff-eb8b-4b9b-95be-6a390e42c975",
+        "3": "73f77fed-c450-483e-b2a7-16efe85bdff1",
+        "12": "fceb9116-821b-4371-9018-0bfa28f022ba"
+      };
+    }
+
+    if (syncData && syncData.success && syncData.results) {
+      for (const item of syncData.results) {
+        const targetId = skuMapping[item.providerSkuId];
+        if (targetId) {
+          await db.update(skus)
+            .set({
+              name: item.name,
+              price: item.price,
+              features: item.features,
+              description: item.description,
+              stock: item.stock,
+              externalUrl: item.externalUrl,
+              topUpType: item.topUpType,
+              currency: item.currency,
+              updatedAt: new Date()
+            })
+            .where(eq(skus.id, targetId));
         }
       }
-
       return syncData;
     }
 
