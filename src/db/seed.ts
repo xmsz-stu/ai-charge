@@ -5,45 +5,53 @@ import { services, providers, skus } from './schema';
 async function seed() {
   console.log('🌱 Seeding database...');
 
+  /* 
   // 1. Clear existing data (order matters: skus ref providers & services)
   await db.delete(skus);
   await db.delete(providers);
   await db.delete(services);
+  */
 
   // 2. Insert Services
   const insertedServices = await db.insert(services).values([
     {
       title: 'ChatGPT Plus',
+      slug: 'chatgpt-plus',
       category: 'Artificial Intelligence',
       description: 'Advanced AI capabilities with GPT-4 access, faster response times, and early access to new features.',
       logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBvY70SIXTcsqY9y1AT8I9-TvqMWB4md80ZrxEAKdR6PbvwGZPMzwcJtlmwlriwL_R-gg7UMdw5UM3iXHaV96x9_hYJcy1yqBOlboPzvPOl_v0VCv9sL7OPSBqFC0xOhoDVnQzaHZ0iWVt8s38t8Bmgr-x3YYDAoqZ9gqRqUgakey9RzeB9uap3ea1RfaLwPM7hoW-S0ZxBu8jg-V_CssDjX1U6Hz1heVKiiBVLLq8PfPSRECtWGQKyf6gA854J62ZcNJvxrrdyRV8',
     },
     {
       title: 'Midjourney',
+      slug: 'midjourney',
       category: 'Artificial Intelligence',
       description: 'State-of-the-art generative AI for high-fidelity images and digital art.',
       logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBcnifs9Byr04EPLr4woi7TrEPZ57nHBop-eXjIIlC43bDZ1Irpvro0uOme8lrbQxoKX1dVDjq9f1R_6fLWQUEerzXKOnOysq1qnN-GgWyzz6anIrlYD603_c3jG8E4Eux9cTdRESYOawAKv585bbBIjqRgKTbAI-Av6kZXsdeyIAFA7LaI8hrUhKxe_9-FL2ZnGrHEkDPGPjf-hwOrb2J4AA1EOGcTfVzSWfOyOkTVv4H-MwKtOQMugGXAUIlshlUz-1eIeRJYVhk',
     },
     {
       title: 'Netflix Premium',
+      slug: 'netflix-premium',
       category: 'Streaming Services',
       description: 'Ultra HD streaming on multiple screens with spatial audio support.',
       logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBNnFsKnB2TA8nUR9SZzgo0vQGo0aPlAhk0hSsMJpDqpP9oUfRNwxPN6f3dgV8u-dlALb5OvKD1w2E8_7bjsRMiC_UnT-BFlMNz1U_dh1YtE6riwg8tIRYdYZLT5HeVlQM-YwaT0lM03hSXRAl0yZe0waIbHiaqlbPnDJRr4yZOqmsBqeNDPVz3ZZEpK4-HSmmLkkvvNr9cHVthyX9EHco4ysGqjc0fQsDaqK_Ptvh1hOoRhEHWTMAiUfIxWpYWOCY4_3C9v4crAiE',
     },
     {
       title: 'YouTube Premium Family',
+      slug: 'youtube-premium-family',
       category: 'Streaming Services',
       description: 'Ad-free YouTube and Music for up to 5 family members. Includes background play and offline downloads.',
       logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuACdqhUpf_uRUO7U1__Om4OSVuxy6YdPwnsNggaKNBIy_aE7mpJjzxqZtf3d5VO8h7rAf7guewpJxkwKjFFsgaN5aqSQhF5XCE-YT-An27q3PmIi8e8m9lX8CFcpd-t3Psu6J22TkfolMj5w8XGRel_X4nlK6oVAvPRm0PjrTZRQm8xpxKJJIU-NOYxEM2Nk1IkQO50g486xehmCtPHZibV-E1UAEWNHl1EzujPMjy-JnKbwo8M1KgPtksIQn1T8Z7-JyK5hhpkPJg',
     },
     {
       title: 'GitHub Copilot Individual',
+      slug: 'github-copilot-individual',
       category: 'Developer Tools',
       description: 'Your AI pair programmer. Suggests code in real-time right from your editor.',
       logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCKGTHMz9lJfMBSfoVLE3xBPfNjQEw9KeLxKa4Gtu3HEv5X5O65cLvRh5Q_jpMn-2mf415snc8aEZ64lCd9jTwixbA1pBJ_NQ8hrVXwiN6hbKNWaoYmdXFAPwBBUOd4v4tN5I6lw9nJQ-RVetGfgCiTA0My91Zlxyv6MMGT1Z-F_JebgeSEyxo2XpQSwQj46R6sGFwuvy4emp_4A1FyiNjh25SDF-BlHjR2lU33Zo5rikAjhM5Luuq3mCeO0Y8K26Xw-K2GI_y2Ktc',
     },
     {
       title: 'Adobe Creative Cloud',
+      slug: 'adobe-creative-cloud',
       category: 'Creative',
       description: 'Full suite of 20+ creative desktop and mobile apps including Photoshop, Illustrator, and Premiere Pro.',
       logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCZIXWVNbX_jZRPxO9BymUhd9MmLHGzMkdazZF5ZGtPm_miLE6C1mvFP3ft23e8posQbBQfQIa8oqQIiHarmIOHTD_VPVQz8plyaO_SRfCn8D9BgRucWk2JPYcpLgthk-SQuCgmE7fQ7YwYTXRu49TGCggdH6UZj7un-Y59WRVaVGyDH0wzrK__3uwc8nN73BjinTOPNWYP3kKadncwy4zWm-L3Lw2SpgOJvGAAWWI95j6cWT6Z2oQmufLuwnCadnyIHWXxbNRH_No',

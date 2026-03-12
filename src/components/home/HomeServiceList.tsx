@@ -149,8 +149,8 @@ export default function HomeServiceList({ services }: HomeServiceListProps) {
                       </p>
                     </div>
                     <Link
-                      to="/detail/$id"
-                      params={{ id: item.id }}
+                      to="/detail/$slug"
+                      params={{ slug: item.slug }}
                       className="mt-4 w-full border border-slate-900 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white dark:border-white dark:group-hover:border-brand-primary dark:text-white text-center block"
                     >
                       View Details

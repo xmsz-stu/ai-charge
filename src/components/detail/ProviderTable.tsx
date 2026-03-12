@@ -77,16 +77,29 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
         const iconType = (provider.iconType as ProviderIconType) ?? 'rocket'
         return (
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded flex items-center justify-center border transition-colors ${
+            <div className={`w-12 h-12 rounded flex items-center justify-center border transition-colors overflow-hidden ${
               provider.isTopPick 
                 ? 'bg-brand-primary/10 text-brand-primary border-brand-primary/20' 
                 : 'bg-brand-primary/5 text-brand-primary border-brand-primary/10'
             }`}>
-              {PROVIDER_ICONS[iconType]}
+              {provider.logoUrl ? (
+                <img 
+                  src={provider.logoUrl} 
+                  alt={provider.name} 
+                  className="w-full h-full object-contain p-2"
+                />
+              ) : provider.isPartner ? (
+                <ShieldCheck className="w-6 h-6" />
+              ) : (
+                PROVIDER_ICONS[iconType]
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <p className="font-bold text-slate-900 dark:text-white leading-tight">{provider.name}</p>
+                {provider.isPartner && (
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/10" />
+                )}
                 {provider.isTopPick && (
                   <Badge className="bg-brand-primary text-[8px] text-white px-1 rounded uppercase font-bold tracking-tighter shadow-none border-none">
                     Top Pick

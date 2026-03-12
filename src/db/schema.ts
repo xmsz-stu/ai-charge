@@ -3,6 +3,7 @@ import { pgTable, text, timestamp, uuid, numeric, integer, boolean } from "drizz
 export const services = pgTable("services", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
   description: text("description"),
   category: text("category").notNull(),
   logoUrl: text("logo_url"),

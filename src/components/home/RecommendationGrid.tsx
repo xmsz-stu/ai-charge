@@ -26,8 +26,8 @@ export default function RecommendationGrid({ services }: RecommendationGridProps
         {services.map((item) => (
           <Link
             key={item.id}
-            to="/detail/$id"
-            params={{ id: item.id }}
+            to="/detail/$slug"
+            params={{ slug: item.slug }}
             className="group relative flex cursor-pointer flex-col overflow-hidden border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-brand-primary dark:border-slate-800 dark:bg-background-dark dark:hover:border-brand-primary"
           >
             <div className="mb-6 flex items-start justify-between">

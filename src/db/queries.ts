@@ -2,6 +2,7 @@ import { db } from './index';
 import { services, providers, skus } from './schema';
 import { eq, desc, min } from 'drizzle-orm';
 import { createServerFn } from '@tanstack/react-start';
+import { slugify } from '../lib/utils';
 
 // ——— Type Definitions —————————————————————————————————————
 
@@ -73,6 +74,29 @@ export const getServiceById = createServerFn({ method: "GET" })
       .from(services)
       .leftJoin(skus, eq(services.id, skus.serviceId))
       .where(eq(services.id, id))
+      .groupBy(services.id)
+      .limit(1);
+
+    if (result.length === 0) return null;
+    
+    return {
+      ...result[0].service,
+      startingPrice: result[0].minPrice,
+    };
+  });
+
+/** 按 Slug 获取单个服务 */
+export const getServiceBySlug = createServerFn({ method: "GET" })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }: { data: string }): Promise<Service | null> => {
+    const result = await db
+      .select({
+        service: services,
+        minPrice: min(skus.price),
+      })
+      .from(services)
+      .leftJoin(skus, eq(services.id, skus.serviceId))
+      .where(eq(services.slug, slug))
       .groupBy(services.id)
       .limit(1);
 
@@ -183,6 +207,7 @@ export const upsertService = createServerFn({ method: "POST" })
     
     const serviceData = {
       title,
+      slug: slugify(title),
       category,
       logoUrl,
       description,
@@ -190,7 +215,8 @@ export const upsertService = createServerFn({ method: "POST" })
     };
 
     if (id) {
-      // 更新
+      // 如果标题改变，生成新的 slug 可能有风险（SEO），但用户要求“直接用 name 不用手输入”
+      // 这里我们总是根据 title 生成 slug
       return db.update(services)
         .set(serviceData)
         .where(eq(services.id, id))
