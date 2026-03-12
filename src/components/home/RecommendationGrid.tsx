@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import type { Service } from '../../db/queries'
 import Price from '../ui/Price'
 
@@ -23,8 +24,10 @@ export default function RecommendationGrid({ services }: RecommendationGridProps
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {services.map((item) => (
-          <div
+          <Link
             key={item.id}
+            to="/detail/$id"
+            params={{ id: item.id }}
             className="group relative flex cursor-pointer flex-col overflow-hidden border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-brand-primary dark:border-slate-800 dark:bg-background-dark dark:hover:border-brand-primary"
           >
             <div className="mb-6 flex items-start justify-between">
@@ -51,7 +54,7 @@ export default function RecommendationGrid({ services }: RecommendationGridProps
                 </p>
               </div>
             </div>
-            <h3 className="mb-2 text-xl font-bold transition-colors duration-300 dark:text-white">
+            <h3 className="mb-2 text-xl font-bold transition-colors duration-300 dark:text-white group-hover:text-brand-primary">
               {item.title}
             </h3>
             <p className="mb-2 flex-grow text-sm text-slate-500">
@@ -61,8 +64,11 @@ export default function RecommendationGrid({ services }: RecommendationGridProps
               <span className="bg-brand-primary/10 px-2 py-0.5 font-mono text-[10px] font-bold text-brand-primary">
                 {item.category}
               </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-primary opacity-0 transition-opacity group-hover:opacity-100">
+                View Details →
+              </span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>
