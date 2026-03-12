@@ -52,7 +52,7 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 gap-0 border-slate-200 dark:border-slate-800 rounded-none bg-white dark:bg-slate-950">
+      <DialogContent className="sm:max-w-5xl  p-0 gap-0 border-slate-200 dark:border-slate-800 rounded-none bg-white dark:bg-slate-950">
         <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex flex-col gap-1 text-left">
             <DialogTitle className="text-xl font-bold tracking-tight text-slate-900 dark:text-white font-display">
@@ -90,7 +90,7 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
                     <SelectValue placeholder="Select provider" />
                   </SelectTrigger>
                   <SelectContent className="rounded-none border-slate-200 dark:border-slate-800">
-                    <SelectItem value="OpenAI Global">OpenAI Global</SelectItem>
+                    <SelectItem value="OpenAI Official">OpenAI Official</SelectItem>
                     <SelectItem value="Proxy Group A">Proxy Group A</SelectItem>
                     <SelectItem value="Reseller Tier 1">Reseller Tier 1</SelectItem>
                   </SelectContent>
@@ -106,7 +106,7 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
               <div className="space-y-1.5 text-left">
                 <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Top-up Type</Label>
                 <div className="flex border border-slate-200 dark:border-slate-800">
-                  {['Proxy', 'Family', 'Private'].map((type) => (
+                  {['Proxy', 'Family', 'Private','Reference'].map((type) => (
                     <button
                       key={type}
                       onClick={() => setFormData({...formData, topUpType: type})}
@@ -192,27 +192,10 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
             </div>
           </div>
 
-          {/* Section 4: Promo Codes */}
-          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-brand-primary">Section 04 / Promo Codes</h3>
-              <span className="text-[10px] text-slate-400">Press Enter to add tag</span>
-            </div>
-            <div className="min-h-[80px] w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 flex flex-wrap gap-2 content-start">
-              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 px-2 py-1">
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">WINTER24</span>
-                <span className="material-symbols-outlined text-sm cursor-pointer text-slate-400">close</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 px-2 py-1">
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">LAUNCH10</span>
-                <span className="material-symbols-outlined text-sm cursor-pointer text-slate-400">close</span>
-              </div>
-              <input className="flex-1 min-w-[60px] bg-transparent border-none text-xs focus:ring-0 p-1" placeholder="Add..." />
-            </div>
-          </div>
 
-          {/* Section 5: Settings */}
+          {/* Section 4: Settings */}
           <div className="p-6">
+            <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-brand-primary mb-4">Section 04 / Settings</h3>
             <div className="flex items-center justify-between">
               <div className="text-left">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">Enable Auto-Sync</h3>

@@ -8,6 +8,11 @@ export function AdminSidebar() {
       to: '/admin',
     },
     {
+      label: 'Channel Management',
+      icon: 'share_windows',
+      to: '/admin/channels',
+    },
+    {
       label: 'Provider Sync',
       icon: 'sync',
       to: '/admin/sync',
