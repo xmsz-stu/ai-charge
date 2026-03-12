@@ -158,7 +158,7 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
             <p className={`text-xl font-bold leading-none ${
               isTopPick ? 'text-brand-primary' : 'text-slate-900 dark:text-white'
             }`}>
-              <Price usdPrice={sku.price} />
+              <Price amount={sku.price} fromCurrency={sku.currency ?? 'USD'} />
             </p>
             {sku.discountLabel && (
               <Badge 
@@ -224,6 +224,7 @@ export function ProviderTable({ skus }: ProviderTableProps) {
     rating: Number(selectedSku.provider.rating ?? 0),
     reviews: `${selectedSku.provider.reviewCount?.toLocaleString()} reviews`,
     price: Number(selectedSku.price),
+    currency: selectedSku.currency ?? 'USD',
   } : null
 
   return (

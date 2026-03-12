@@ -47,7 +47,7 @@ export default function RecommendationGrid({ services }: RecommendationGridProps
                   Starting Price
                 </span>
                 <p className="font-display text-2xl font-bold transition-colors duration-300 dark:text-white">
-                  <Price usdPrice={item.startingPrice ?? 0} />
+                  <Price amount={item.startingPrice ?? 0} fromCurrency={item.startingCurrency ?? 'USD'} />
                   <span className="text-sm font-normal text-slate-500">
                     /mo
                   </span>

@@ -35,7 +35,16 @@ export const SUPPORTED_CURRENCIES: Currency[] = [
 
 export const DEFAULT_CURRENCY = SUPPORTED_CURRENCIES[0];
 
-export function convertPrice(usdPrice: number, targetCurrency: Currency): number {
+export function convertPrice(price: number, targetCurrency: Currency, sourceCurrencyCode: string = 'USD'): number {
+  if (sourceCurrencyCode === targetCurrency.code) return price;
+  
+  const sourceCurrency = SUPPORTED_CURRENCIES.find(c => c.code === sourceCurrencyCode);
+  if (!sourceCurrency) return price; // Fallback if source currency unknown
+  
+  // Convert source to USD first
+  const usdPrice = price / sourceCurrency.rate;
+  
+  // Then convert USD to target
   return usdPrice * targetCurrency.rate;
 }
 

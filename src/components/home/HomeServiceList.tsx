@@ -142,7 +142,7 @@ export default function HomeServiceList({ services }: HomeServiceListProps) {
                   <div className="flex flex-col items-end justify-between border-l-0 border-slate-100 pt-4 dark:border-slate-800 md:w-48 md:border-l md:pl-6 md:pt-0">
                     <div className="text-right">
                       <p className="font-display text-2xl font-bold transition-colors dark:text-white">
-                        <Price usdPrice={item.startingPrice ?? 0} />
+                        <Price amount={item.startingPrice ?? 0} fromCurrency={item.startingCurrency ?? 'USD'} />
                       </p>
                       <p className="font-mono text-[10px] text-slate-500">
                         EST. STARTING PRICE

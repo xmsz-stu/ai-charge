@@ -2,21 +2,22 @@ import { useCurrency } from '../CurrencyContext';
 import { convertPrice } from '../../lib/currency';
 
 interface PriceProps {
-  usdPrice: number | string;
+  amount: number | string;
   className?: string;
   showCode?: boolean;
+  fromCurrency?: string;
 }
 
-export default function Price({ usdPrice, className = '', showCode = false }: PriceProps) {
+export default function Price({ amount, className = '', showCode = false, fromCurrency = 'USD' }: PriceProps) {
   const { currentCurrency } = useCurrency();
   
-  const price = typeof usdPrice === 'string' ? parseFloat(usdPrice) : usdPrice;
+  const price = typeof amount === 'string' ? parseFloat(amount) : amount;
   
   if (isNaN(price)) {
     return <span className={className}>-</span>;
   }
 
-  const converted = convertPrice(price, currentCurrency);
+  const converted = convertPrice(price, currentCurrency, fromCurrency);
   
   const formatted = new Intl.NumberFormat('en-US', {
     style: 'currency',

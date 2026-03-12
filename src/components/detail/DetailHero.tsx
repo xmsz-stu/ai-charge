@@ -37,7 +37,7 @@ export function DetailHero({ service }: DetailHeroProps) {
         <div className="text-right">
           <p className="text-xs text-slate-400 uppercase font-bold tracking-tighter">Starting at</p>
           <p className="text-3xl font-bold text-brand-primary">
-            <Price usdPrice={service.startingPrice ?? 0} />
+            <Price amount={service.startingPrice ?? 0} fromCurrency={service.startingCurrency ?? 'USD'} />
             <span className="text-sm font-normal text-slate-400">/mo</span>
           </p>
         </div>
