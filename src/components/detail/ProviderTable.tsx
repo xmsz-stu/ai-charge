@@ -54,6 +54,24 @@ const PAYMENT_ICONS: Record<string, React.ReactNode> = {
   star: <Star className="w-4 h-4" />,
 }
 
+// Helper to parse billing cycle string into number of months
+function getMonthsFromCycle(cycle: string): number {
+  const c = cycle.toLowerCase()
+  if (c.includes('1 month') || c === 'monthly' || c === 'month') return 1
+  if (c.includes('3 months')) return 3
+  if (c.includes('6 months')) return 6
+  if (c.includes('1 year') || c === 'yearly' || c === 'annual') return 12
+  
+  // Regex fallbacks
+  const monthMatch = c.match(/(\d+)\s*month/)
+  if (monthMatch) return parseInt(monthMatch[1])
+  
+  const yearMatch = c.match(/(\d+)\s*year/)
+  if (yearMatch) return parseInt(yearMatch[1]) * 12
+  
+  return 1
+}
+
 // Helper to pick a feature icon
 function getFeatureIcon(label: string): React.ReactNode {
   if (label.toLowerCase().includes('instant') || label.toLowerCase().includes('fast')) {
@@ -112,6 +130,24 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
                 <span className="text-xs font-bold">{Number(provider.rating ?? 0).toFixed(1)}</span>
                 <span className="text-[10px] text-slate-400">({provider.reviewCount?.toLocaleString()} reviews)</span>
               </div>
+              {provider.promoCodes && (provider.promoCodes as any[]).length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {(provider.promoCodes as any[]).map((promo, i) => (
+                    <div 
+                      key={i} 
+                      className="flex items-center gap-1 px-1.5 py-0.5 bg-brand-primary/[0.03] border border-brand-primary/20 rounded-sm cursor-help"
+                      title={promo.description}
+                    >
+                      <Badge className="bg-brand-primary text-[8px] text-white px-1 leading-none rounded-sm uppercase font-bold tracking-tighter h-3.5 border-none">
+                        VOUCHER
+                      </Badge>
+                      <span className="text-[9px] font-bold text-brand-primary uppercase tracking-tighter">
+                        {promo.code}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )
@@ -167,6 +203,9 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
       cell: ({ row }) => {
         const sku = row.original
         const isTopPick = sku.provider.isTopPick
+        const months = getMonthsFromCycle(sku.billingCycle)
+        const avgMonthlyPrice = months > 1 ? Number(sku.price) / months : null
+
         return (
           <div className="text-right">
             <p className={`text-xl font-bold leading-none ${
@@ -174,6 +213,11 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
             }`}>
               <Price amount={sku.price} fromCurrency={sku.currency ?? 'USD'} />
             </p>
+            {avgMonthlyPrice && (
+              <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                (avg. <Price amount={avgMonthlyPrice} fromCurrency={sku.currency ?? 'USD'} />/mo)
+              </p>
+            )}
             {sku.discountLabel && (
               <Badge 
                 variant="default" 
