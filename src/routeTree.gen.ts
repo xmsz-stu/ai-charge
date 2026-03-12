@@ -14,7 +14,8 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DetailIdRouteImport } from './routes/detail.$id'
-import { Route as AdminChannelsRouteImport } from './routes/admin.channels'
+import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminProvidersRouteImport } from './routes/admin.providers'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -41,9 +42,14 @@ const DetailIdRoute = DetailIdRouteImport.update({
   path: '/detail/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminChannelsRoute = AdminChannelsRouteImport.update({
-  id: '/channels',
-  path: '/channels',
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProvidersRoute = AdminProvidersRouteImport.update({
+  id: '/providers',
+  path: '/providers',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -51,14 +57,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/admin/channels': typeof AdminChannelsRoute
+  '/admin/providers': typeof AdminProvidersRoute
+  '/admin/services': typeof AdminServicesRoute
   '/detail/$id': typeof DetailIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin/channels': typeof AdminChannelsRoute
+  '/admin/providers': typeof AdminProvidersRoute
+  '/admin/services': typeof AdminServicesRoute
   '/detail/$id': typeof DetailIdRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -67,7 +75,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/admin/channels': typeof AdminChannelsRoute
+  '/admin/providers': typeof AdminProvidersRoute
+  '/admin/services': typeof AdminServicesRoute
   '/detail/$id': typeof DetailIdRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -77,17 +86,25 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
-    | '/admin/channels'
+    | '/admin/providers'
+    | '/admin/services'
     | '/detail/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/admin/channels' | '/detail/$id' | '/admin'
+  to:
+    | '/'
+    | '/about'
+    | '/admin/providers'
+    | '/admin/services'
+    | '/detail/$id'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/admin'
-    | '/admin/channels'
+    | '/admin/providers'
+    | '/admin/services'
     | '/detail/$id'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -136,23 +153,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DetailIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/channels': {
-      id: '/admin/channels'
-      path: '/channels'
-      fullPath: '/admin/channels'
-      preLoaderRoute: typeof AdminChannelsRouteImport
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/providers': {
+      id: '/admin/providers'
+      path: '/providers'
+      fullPath: '/admin/providers'
+      preLoaderRoute: typeof AdminProvidersRouteImport
       parentRoute: typeof AdminRoute
     }
   }
 }
 
 interface AdminRouteChildren {
-  AdminChannelsRoute: typeof AdminChannelsRoute
+  AdminProvidersRoute: typeof AdminProvidersRoute
+  AdminServicesRoute: typeof AdminServicesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminChannelsRoute: AdminChannelsRoute,
+  AdminProvidersRoute: AdminProvidersRoute,
+  AdminServicesRoute: AdminServicesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

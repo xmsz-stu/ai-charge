@@ -4,12 +4,12 @@ import { DetailBreadcrumb } from '../components/detail/DetailBreadcrumb'
 import { DetailHero } from '../components/detail/DetailHero'
 import { BillingSelector } from '../components/detail/BillingSelector'
 import { ProviderTable } from '../components/detail/ProviderTable'
-import { getServiceBySlug, getSkusByServiceId } from '../db/queries'
+import { getServiceById, getSkusByServiceId } from '../db/queries'
 import { notFound } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/detail/$id')({
   loader: async ({ params }) => {
-    const service = await getServiceBySlug({ data: params.id })
+    const service = await getServiceById({ data: params.id })
     if (!service) throw notFound()
 
     const skus = await getSkusByServiceId({ data: service.id })

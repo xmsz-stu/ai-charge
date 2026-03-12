@@ -8,9 +8,14 @@ export function AdminSidebar() {
       to: '/admin',
     },
     {
-      label: 'Channel Management',
+      label: 'Service Management',
+      icon: 'category',
+      to: '/admin/services',
+    },
+    {
+      label: 'Provider Management',
       icon: 'share_windows',
-      to: '/admin/channels',
+      to: '/admin/providers',
     },
     {
       label: 'Provider Sync',

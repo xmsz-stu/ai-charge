@@ -2,16 +2,11 @@ import { pgTable, text, timestamp, uuid, numeric, integer, boolean } from "drizz
 
 export const services = pgTable("services", {
   id: uuid("id").defaultRandom().primaryKey(),
-  slug: text("slug").unique().notNull(),
   title: text("title").notNull(),
   description: text("description"),
   category: text("category").notNull(),
-  region: text("region").default("Global"),
   logoUrl: text("logo_url"),
-  promo: boolean("promo").default(false),          // 首页推荐标记
-  startingPrice: numeric("starting_price", { precision: 10, scale: 2 }), // 最低价格快照
-  rating: numeric("rating", { precision: 2, scale: 1 }).default("0.0"),  // 综合评分
-  discountLabel: text("discount_label"),            // 例: "15% MAX"
+  startingPrice: numeric("starting_price", { precision: 10, scale: 2 }), // Lowest price snapshot
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -41,6 +36,15 @@ export const skus = pgTable("skus", {
   billingCycle: text("billing_cycle").notNull(),
   features: text("features").array(),
   externalUrl: text("external_url"),
+  
+  // UI Fields
+  topUpType: text("top_up_type").notNull().default("Proxy"),
+  version: text("version").notNull().default("Plus"),
+  processingFee: numeric("processing_fee", { precision: 5, scale: 2 }).default("0.00"),
+  discount: numeric("discount", { precision: 5, scale: 2 }).default("0.00"),
+  autoSync: boolean("auto_sync").default(true),
+  currency: text("currency").default("USD"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

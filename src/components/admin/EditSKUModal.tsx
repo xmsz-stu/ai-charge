@@ -17,6 +17,8 @@ import {
 import { Switch } from "../ui/switch"
 import { cn } from "../../lib/utils"
 import { useState, useEffect } from "react"
+import { getServicesForSelect, getProvidersForSelect, upsertSku } from "../../db/queries"
+import { useRouter } from "@tanstack/react-router"
 
 interface EditSKUModalProps {
   isOpen: boolean
@@ -25,7 +27,12 @@ interface EditSKUModalProps {
 }
 
 export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
+  const router = useRouter()
+  const [services, setServices] = useState<{id: string, title: string}[]>([])
+  const [providers, setProviders] = useState<{id: string, name: string}[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<any>({
+    id: "",
     serviceId: "",
     providerId: "",
     topUpType: "Proxy",
@@ -33,10 +40,23 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
     billingCycle: "1 Month",
     basePrice: 20.00,
     currency: "USD",
-    processingFee: 2.5,
+    processingFee: 0,
     discount: 0,
     autoSync: true,
   })
+
+  // Load select options
+  useEffect(() => {
+    const loadOptions = async () => {
+      const [s, p] = await Promise.all([
+        getServicesForSelect(),
+        getProvidersForSelect()
+      ])
+      setServices(s)
+      setProviders(p)
+    }
+    loadOptions()
+  }, [])
 
   const currencies = [
     { code: 'USD', symbol: '$' },
@@ -51,13 +71,35 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
   useEffect(() => {
     if (sku) {
       setFormData({
-        ...formData,
-        serviceId: sku.serviceName,
-        providerId: sku.providerName,
-        basePrice: sku.price,
+        id: sku.id,
+        serviceId: sku.serviceId,
+        providerId: sku.providerId,
+        topUpType: sku.topUpType || "Proxy",
+        version: sku.version || "Plus",
+        billingCycle: sku.billingCycle,
+        basePrice: parseFloat(sku.price) || 0,
+        currency: sku.currency || "USD",
+        processingFee: parseFloat(sku.processingFee) || 0,
+        discount: parseFloat(sku.discount) || 0,
+        autoSync: sku.autoSync ?? true,
+      })
+    } else {
+      // Reset for "Add New"
+      setFormData({
+        id: "",
+        serviceId: "",
+        providerId: "",
+        topUpType: "Proxy",
+        version: "Plus",
+        billingCycle: "1 Month",
+        basePrice: 0,
+        currency: "USD",
+        processingFee: 0,
+        discount: 0,
+        autoSync: true,
       })
     }
-  }, [sku])
+  }, [sku, isOpen])
 
   const netPrice = (formData.basePrice * (1 + formData.processingFee / 100) * (1 - formData.discount / 100)).toFixed(2)
 
@@ -87,10 +129,9 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
                     <SelectValue placeholder="Select service" />
                   </SelectTrigger>
                   <SelectContent className="rounded-none border-slate-200 dark:border-slate-800">
-                    <SelectItem value="ChatGPT Plus">ChatGPT Plus</SelectItem>
-                    <SelectItem value="Midjourney">Midjourney</SelectItem>
-                    <SelectItem value="Claude Pro">Claude Pro</SelectItem>
-                    <SelectItem value="Perplexity Pro">Perplexity Pro</SelectItem>
+                    {services.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -101,9 +142,9 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
                     <SelectValue placeholder="Select provider" />
                   </SelectTrigger>
                   <SelectContent className="rounded-none border-slate-200 dark:border-slate-800">
-                    <SelectItem value="OpenAI Official">OpenAI Official</SelectItem>
-                    <SelectItem value="Proxy Group A">Proxy Group A</SelectItem>
-                    <SelectItem value="Reseller Tier 1">Reseller Tier 1</SelectItem>
+                    {providers.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -245,10 +286,22 @@ export function EditSKUModal({ isOpen, onClose, sku }: EditSKUModalProps) {
             Cancel
           </Button>
           <Button 
-            onClick={onClose}
-            className="bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-2 text-sm font-bold transition-colors uppercase tracking-widest rounded-none"
+            onClick={async () => {
+              try {
+                setIsLoading(true)
+                await upsertSku({ data: formData })
+                await router.invalidate()
+                onClose()
+              } catch (error) {
+                console.error("Save failed:", error)
+              } finally {
+                setIsLoading(false)
+              }
+            }}
+            disabled={isLoading || !formData.serviceId || !formData.providerId}
+            className="bg-brand-primary hover:bg-brand-primary/90 text-white px-8 py-2 text-sm font-bold transition-colors uppercase tracking-widest rounded-none min-w-[140px]"
           >
-            Save Changes
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </DialogContent>

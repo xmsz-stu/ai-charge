@@ -132,9 +132,6 @@ export default function HomeServiceList({ services }: HomeServiceListProps) {
                         <span className="bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-500 dark:bg-slate-800">
                           {item.category}
                         </span>
-                        <span className="bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-500 dark:bg-slate-800">
-                          {item.region}
-                        </span>
                       </div>
                     </div>
                     <p className="max-w-xl text-xs text-slate-500 transition-colors">
@@ -143,11 +140,6 @@ export default function HomeServiceList({ services }: HomeServiceListProps) {
                   </div>
                   <div className="flex flex-col items-end justify-between border-l-0 border-slate-100 pt-4 dark:border-slate-800 md:w-48 md:border-l md:pl-6 md:pt-0">
                     <div className="text-right">
-                      <div className="mb-1 flex items-center justify-end gap-2">
-                        <span className={`${item.discountLabel === 'NO REBATE' ? 'bg-slate-100 text-slate-400 dark:bg-slate-800' : 'bg-green-500 text-white'} px-2 py-0.5 font-bold text-[10px]`}>
-                          {item.discountLabel ?? '—'}
-                        </span>
-                      </div>
                       <p className="font-display text-2xl font-bold transition-colors dark:text-white">
                         ${Number(item.startingPrice ?? 0).toFixed(2)}
                       </p>
@@ -157,7 +149,7 @@ export default function HomeServiceList({ services }: HomeServiceListProps) {
                     </div>
                     <Link
                       to="/detail/$id"
-                      params={{ id: item.slug }}
+                      params={{ id: item.id }}
                       className="mt-4 w-full border border-slate-900 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white dark:border-white dark:group-hover:border-brand-primary dark:text-white text-center block"
                     >
                       View Details
