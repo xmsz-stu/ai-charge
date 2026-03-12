@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DetailSlugRouteImport } from './routes/detail.$slug'
+import { Route as AdminSyncRouteImport } from './routes/admin.sync'
 import { Route as AdminServicesRouteImport } from './routes/admin.services'
 import { Route as AdminProvidersRouteImport } from './routes/admin.providers'
 
@@ -42,6 +43,11 @@ const DetailSlugRoute = DetailSlugRouteImport.update({
   path: '/detail/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSyncRoute = AdminSyncRouteImport.update({
+  id: '/sync',
+  path: '/sync',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminServicesRoute = AdminServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/admin/providers': typeof AdminProvidersRoute
   '/admin/services': typeof AdminServicesRoute
+  '/admin/sync': typeof AdminSyncRoute
   '/detail/$slug': typeof DetailSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin/providers': typeof AdminProvidersRoute
   '/admin/services': typeof AdminServicesRoute
+  '/admin/sync': typeof AdminSyncRoute
   '/detail/$slug': typeof DetailSlugRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/admin/providers': typeof AdminProvidersRoute
   '/admin/services': typeof AdminServicesRoute
+  '/admin/sync': typeof AdminSyncRoute
   '/detail/$slug': typeof DetailSlugRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/providers'
     | '/admin/services'
+    | '/admin/sync'
     | '/detail/$slug'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin/providers'
     | '/admin/services'
+    | '/admin/sync'
     | '/detail/$slug'
     | '/admin'
   id:
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/providers'
     | '/admin/services'
+    | '/admin/sync'
     | '/detail/$slug'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -153,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DetailSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/sync': {
+      id: '/admin/sync'
+      path: '/sync'
+      fullPath: '/admin/sync'
+      preLoaderRoute: typeof AdminSyncRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/services': {
       id: '/admin/services'
       path: '/services'
@@ -173,12 +192,14 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminProvidersRoute: typeof AdminProvidersRoute
   AdminServicesRoute: typeof AdminServicesRoute
+  AdminSyncRoute: typeof AdminSyncRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminProvidersRoute: AdminProvidersRoute,
   AdminServicesRoute: AdminServicesRoute,
+  AdminSyncRoute: AdminSyncRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
