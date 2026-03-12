@@ -180,6 +180,22 @@ function getColumns(onPurchase: (sku: SkuWithProvider) => void): ColumnDef<SkuWi
       },
     },
     {
+      id: 'promoCodes',
+      header: 'Promotions',
+      cell: ({ row }) => {
+        const promoCodes = (row.original.provider.promoCodes as any[]) || []
+        return (
+          <div className="flex flex-col gap-1">
+            {promoCodes.map((promo, i) => (
+              <div key={i} className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                {promo.description}
+              </div>
+            ))}
+          </div>
+        )
+      },
+    },
+    {
       accessorKey: 'price',
       header: () => <div className="text-right">Pricing & Discount</div>,
       cell: ({ row }) => {
