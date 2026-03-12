@@ -1,12 +1,33 @@
 
 import dayjs from 'dayjs'
-import { type Provider } from '@/db/queries'
+import { useState } from 'react'
+import { type Provider, triggerProviderSync } from '@/db/queries'
 
 interface SyncFeedsTableProps {
   providers: Provider[]
 }
 
 export function SyncFeedsTable({ providers }: SyncFeedsTableProps) {
+  const [syncingId, setSyncingId] = useState<string | null>(null)
+
+  const handleTrigger = async (providerId: string) => {
+    try {
+      setSyncingId(providerId)
+      const result = await triggerProviderSync({ data: providerId })
+      console.log('Sync result:', result)
+      if (result.success) {
+        alert(`Sync success for ${result.provider}!\nFound ${result.results?.length} items.`)
+      } else {
+        alert(`Sync failed: ${result.message}`)
+      }
+    } catch (error) {
+      console.error('Trigger error:', error)
+      alert('Failed to trigger sync. Check console for details.')
+    } finally {
+      setSyncingId(null)
+    }
+  }
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
@@ -37,8 +58,18 @@ export function SyncFeedsTable({ providers }: SyncFeedsTableProps) {
               <tr key={provider.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-slate-800 flex items-center justify-center text-[8px] text-white">
-                      {provider.name.substring(0, 3).toUpperCase()}
+                    <div className="w-8 h-8 rounded-none border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden bg-white dark:bg-slate-900 shrink-0">
+                      {provider.logoUrl ? (
+                        <img
+                          src={provider.logoUrl}
+                          alt={provider.name}
+                          className="w-full h-full object-contain p-1"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-800 flex items-center justify-center text-[8px] text-white">
+                          {provider.name.substring(0, 3).toUpperCase()}
+                        </div>
+                      )}
                     </div>
                     <span className="font-medium text-slate-900 dark:text-slate-100 font-display">
                       {provider.name}
@@ -66,8 +97,12 @@ export function SyncFeedsTable({ providers }: SyncFeedsTableProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right space-x-3">
-                  <button className="text-brand-primary hover:underline text-xs font-bold font-display uppercase tracking-wider">
-                    Trigger
+                  <button
+                    onClick={() => handleTrigger(provider.id)}
+                    disabled={syncingId === provider.id}
+                    className="text-brand-primary hover:underline text-xs font-bold font-display uppercase tracking-wider disabled:opacity-50 disabled:no-underline"
+                  >
+                    {syncingId === provider.id ? 'Syncing...' : 'Trigger'}
                   </button>
                   <button className="text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 material-symbols-outlined text-lg align-middle transition-colors">
                     settings
